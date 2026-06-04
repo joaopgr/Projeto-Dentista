@@ -2,21 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Calendar,
+  LayoutDashboard,
+  Package,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
 
-export type NavItem = {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-};
+const navItems = [
+  { href: "/dashboard", label: "Início", icon: LayoutDashboard },
+  { href: "/pacientes", label: "Pacientes", icon: Users },
+  { href: "/agenda", label: "Agenda", icon: Calendar },
+  { href: "/estoque", label: "Estoque", icon: Package },
+] as const;
 
-export function SidebarNav({ items }: { items: NavItem[] }) {
+export function SidebarNav() {
   const pathname = usePathname();
 
   return (
     <nav className="flex-1 space-y-1 p-3">
-      {items.map(({ href, label, icon: Icon }) => {
+      {navItems.map(({ href, label, icon: Icon }) => {
         const active =
           pathname === href ||
           (href !== "/dashboard" && pathname.startsWith(href));
@@ -41,12 +48,12 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
   );
 }
 
-export function MobileNav({ items }: { items: NavItem[] }) {
+export function MobileNav() {
   const pathname = usePathname();
 
   return (
     <nav className="flex gap-1 overflow-x-auto px-2 pb-2">
-      {items.map(({ href, label, icon: Icon }) => {
+      {navItems.map(({ href, label, icon: Icon }) => {
         const active =
           pathname === href ||
           (href !== "/dashboard" && pathname.startsWith(href));
@@ -70,3 +77,9 @@ export function MobileNav({ items }: { items: NavItem[] }) {
     </nav>
   );
 }
+
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+};

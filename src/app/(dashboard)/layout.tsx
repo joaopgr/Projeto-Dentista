@@ -1,21 +1,8 @@
 import { redirect } from "next/navigation";
-import {
-  Calendar,
-  LayoutDashboard,
-  Package,
-  Shield,
-  Users,
-} from "lucide-react";
+import { Shield } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { MobileNav, SidebarNav, type NavItem } from "@/components/layout/sidebar-nav";
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Início", icon: LayoutDashboard },
-  { href: "/pacientes", label: "Pacientes", icon: Users },
-  { href: "/agenda", label: "Agenda", icon: Calendar },
-  { href: "/estoque", label: "Estoque", icon: Package },
-];
+import { MobileNav, SidebarNav } from "@/components/layout/sidebar-nav";
 
 export default async function DashboardLayout({
   children,
@@ -54,7 +41,7 @@ export default async function DashboardLayout({
           </div>
         </div>
 
-        <SidebarNav items={navItems} />
+        <SidebarNav />
 
         <div className="border-t border-white/10 p-4">
           <div className="rounded-xl bg-white/10 p-3 ring-1 ring-white/10">
@@ -78,7 +65,7 @@ export default async function DashboardLayout({
             </div>
             <SignOutButton compact />
           </div>
-          <MobileNav items={navItems} />
+          <MobileNav />
         </header>
 
         <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">{children}</main>
