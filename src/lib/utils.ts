@@ -31,3 +31,9 @@ export function splitScheduledAt(iso: string): { date: string; time: string } {
 export function combineDateAndTime(date: string, time: string): string {
   return new Date(`${date}T${time}:00`).toISOString();
 }
+
+/** Supabase pode retornar relação como objeto ou array */
+export function normalizeRelation<T>(value: T | T[] | null | undefined): T | null {
+  if (value == null) return null;
+  return Array.isArray(value) ? value[0] ?? null : value;
+}

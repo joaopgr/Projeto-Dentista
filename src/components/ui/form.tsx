@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { ButtonHTMLAttributes, InputHTMLAttributes, forwardRef } from "react";
 
+export { Card, PageHeader } from "@/components/ui/card";
+
 const fieldClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20";
 
@@ -108,39 +110,5 @@ export function Button({
       {loading && <Loader2 className="h-4 w-4 animate-spin" />}
       {children}
     </button>
-  );
-}
-
-export function Card({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-200/50",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
-export function PageHeader({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div className="mb-6">
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
-      {subtitle && <p className="mt-1 text-slate-500">{subtitle}</p>}
-    </div>
   );
 }

@@ -3,8 +3,9 @@ import { format, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AlertTriangle, Calendar, ChevronRight, Clock, Package, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Card } from "@/components/ui/form";
-import { APPOINTMENT_STATUS_LABELS, isLowStock, type Material } from "@/types/database";
+import { Card } from "@/components/ui/card";
+import { normalizeRelation } from "@/lib/utils";
+import { APPOINTMENT_STATUS_LABELS, isLowStock } from "@/types/database";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export default async function DashboardPage() {
     { count: patientsCount },
     { count: todayAppointmentsCount },
     { data: todayAppointments },
-    { data: materials },
+    { data: materials, error: materialsError },
   ] = await Promise.all([
     supabase.from("patients").select("*", { count: "exact", head: true }),
     supabase
@@ -35,8 +36,8 @@ export default async function DashboardPage() {
     supabase.from("materials").select("*"),
   ]);
 
-  const lowStockCount =
-    (materials as Material[] | null)?.filter(isLowStock).length ?? 0;
+  const materialsList = materialsError ? [] : (materials ?? []);
+  const lowStockCount = materialsList.filter(isLowStock).length;
 
   return (
     <div className="space-y-8">
@@ -130,7 +131,7 @@ export default async function DashboardPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-slate-900">
-                        {apt.patients?.full_name}
+                        {normalizeRelation(apt.patients)?.full_name ?? "Paciente"}
                       </p>
                       <p className="text-sm text-slate-500">
                         {apt.procedure_type || "Consulta"}

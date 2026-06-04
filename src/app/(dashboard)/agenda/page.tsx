@@ -14,7 +14,8 @@ import {
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Card } from "@/components/ui/form";
+import { Card } from "@/components/ui/card";
+import { normalizeRelation } from "@/lib/utils";
 import { APPOINTMENT_STATUS_LABELS, type AppointmentWithPatient } from "@/types/database";
 
 export default async function AgendaPage({
@@ -50,7 +51,7 @@ async function TodayView({ dia }: { dia?: string }) {
     .neq("status", "cancelled")
     .order("scheduled_at", { ascending: true });
 
-  const list = (appointments as AppointmentWithPatient[] | null) ?? [];
+  const list = normalizeAppointments(appointments);
 
   return (
     <div className="space-y-6">
@@ -133,7 +134,7 @@ async function WeekView({ semana }: { semana?: string }) {
     .lte("scheduled_at", weekEnd.toISOString())
     .order("scheduled_at", { ascending: true });
 
-  const grouped = groupByDay(appointments as AppointmentWithPatient[] | null);
+  const grouped = groupByDay(normalizeAppointments(appointments));
 
   return (
     <div className="space-y-6">
@@ -307,6 +308,21 @@ function DayNavigation({
       </Link>
     </div>
   );
+}
+
+function normalizeAppointments(raw: unknown): AppointmentWithPatient[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((row) => {
+    const apt = row as AppointmentWithPatient & { patients: unknown };
+    return {
+      ...apt,
+      patients: normalizeRelation(apt.patients) ?? {
+        id: "",
+        full_name: "Paciente",
+        phone: "",
+      },
+    };
+  });
 }
 
 function groupByDay(appointments: AppointmentWithPatient[] | null) {

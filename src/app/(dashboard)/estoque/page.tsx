@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, Package, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Card } from "@/components/ui/form";
+import { Card } from "@/components/ui/card";
 import { MaterialSearch } from "@/components/materials/material-search";
 import { getUnitLabel, isLowStock, type Material } from "@/types/database";
 

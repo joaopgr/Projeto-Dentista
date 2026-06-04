@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatCPF, formatPhone } from "@/lib/utils";
-import { Card } from "@/components/ui/form";
+import { Card } from "@/components/ui/card";
 import { PatientSearch } from "@/components/patients/patient-search";
 
 export default async function PatientsPage({
