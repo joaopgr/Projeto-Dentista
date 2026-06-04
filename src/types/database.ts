@@ -65,3 +65,46 @@ export const PROCEDURE_TYPES = [
   "Retorno",
   "Outro",
 ] as const;
+
+export type Material = {
+  id: string;
+  user_id: string;
+  name: string;
+  category: string | null;
+  quantity: number;
+  unit: string;
+  min_quantity: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export const MATERIAL_UNITS = [
+  { value: "un", label: "Unidade" },
+  { value: "cx", label: "Caixa" },
+  { value: "pct", label: "Pacote" },
+  { value: "ml", label: "ml" },
+  { value: "g", label: "g" },
+  { value: "par", label: "Par" },
+] as const;
+
+export const MATERIAL_CATEGORIES = [
+  "Anestésicos",
+  "Descartáveis",
+  "Restauradores",
+  "Endodontia",
+  "Próteses",
+  "Ortodontia",
+  "Instrumentos",
+  "Higiene",
+  "Medicamentos",
+  "Outros",
+] as const;
+
+export function getUnitLabel(unit: string): string {
+  return MATERIAL_UNITS.find((u) => u.value === unit)?.label ?? unit;
+}
+
+export function isLowStock(material: Pick<Material, "quantity" | "min_quantity">): boolean {
+  return material.min_quantity > 0 && material.quantity <= material.min_quantity;
+}

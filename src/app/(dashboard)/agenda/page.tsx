@@ -1,5 +1,16 @@
 import Link from "next/link";
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  addWeeks,
+  subWeeks,
+  startOfDay,
+  endOfDay,
+  addDays,
+  subDays,
+  isToday,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -9,10 +20,105 @@ import { APPOINTMENT_STATUS_LABELS, type AppointmentWithPatient } from "@/types/
 export default async function AgendaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ semana?: string }>;
+  searchParams: Promise<{ semana?: string; dia?: string; view?: string }>;
 }) {
-  const { semana } = await searchParams;
-  const baseDate = semana ? new Date(semana) : new Date();
+  const params = await searchParams;
+  const view = params.view === "semana" ? "semana" : "hoje";
+
+  if (view === "hoje") {
+    return <TodayView dia={params.dia} />;
+  }
+
+  return <WeekView semana={params.semana} />;
+}
+
+async function TodayView({ dia }: { dia?: string }) {
+  const baseDate = dia ? new Date(dia + "T12:00:00") : new Date();
+  const dayStart = startOfDay(baseDate);
+  const dayEnd = endOfDay(baseDate);
+
+  const prevDay = format(subDays(dayStart, 1), "yyyy-MM-dd");
+  const nextDay = format(addDays(dayStart, 1), "yyyy-MM-dd");
+  const dayParam = format(dayStart, "yyyy-MM-dd");
+
+  const supabase = await createClient();
+  const { data: appointments } = await supabase
+    .from("appointments")
+    .select("*, patients(id, full_name, phone)")
+    .gte("scheduled_at", dayStart.toISOString())
+    .lte("scheduled_at", dayEnd.toISOString())
+    .neq("status", "cancelled")
+    .order("scheduled_at", { ascending: true });
+
+  const list = (appointments as AppointmentWithPatient[] | null) ?? [];
+
+  return (
+    <div className="space-y-6">
+      <AgendaHeader
+        title="Agenda"
+        subtitle={format(dayStart, "EEEE, d 'de' MMMM", { locale: ptBR })}
+        isToday={isToday(dayStart)}
+      />
+
+      <ViewTabs active="hoje" />
+
+      <DayNavigation
+        prevHref={`/agenda?view=hoje&dia=${prevDay}`}
+        nextHref={`/agenda?view=hoje&dia=${nextDay}`}
+        currentHref="/agenda?view=hoje"
+        currentLabel={isToday(dayStart) ? "Hoje" : format(dayStart, "d/MM", { locale: ptBR })}
+      />
+
+      <Card>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-semibold text-slate-900">
+            {list.length} consulta(s) neste dia
+          </h2>
+        </div>
+
+        {list.length === 0 ? (
+          <p className="py-8 text-center text-sm text-slate-500">
+            Nenhuma consulta agendada para este dia.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {list.map((apt) => (
+              <li key={apt.id}>
+                <Link
+                  href={`/agenda/${apt.id}`}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 p-4 transition hover:border-teal-200 hover:bg-teal-50/50"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 flex-col items-center justify-center rounded-xl bg-teal-100 text-teal-800">
+                      <span className="text-lg font-bold leading-none">
+                        {format(new Date(apt.scheduled_at), "HH:mm")}
+                      </span>
+                      <span className="mt-0.5 text-[10px] font-medium">
+                        {apt.duration_minutes}min
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        {apt.patients.full_name}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {apt.procedure_type || "Consulta"} · {apt.patients.phone}
+                      </p>
+                    </div>
+                  </div>
+                  <StatusBadge status={apt.status} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+async function WeekView({ semana }: { semana?: string }) {
+  const baseDate = semana ? new Date(semana + "T12:00:00") : new Date();
   const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 });
 
@@ -31,58 +137,40 @@ export default async function AgendaPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Agenda</h1>
-          <p className="text-slate-600">
-            {format(weekStart, "d MMM", { locale: ptBR })} —{" "}
-            {format(weekEnd, "d MMM yyyy", { locale: ptBR })}
-          </p>
-        </div>
-        <Link
-          href="/agenda/novo"
-          className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-700"
-        >
-          <Plus className="h-4 w-4" />
-          Novo agendamento
-        </Link>
-      </div>
+      <AgendaHeader
+        title="Agenda"
+        subtitle={`${format(weekStart, "d MMM", { locale: ptBR })} — ${format(weekEnd, "d MMM yyyy", { locale: ptBR })}`}
+      />
 
-      <div className="flex items-center justify-between">
-        <Link
-          href={`/agenda?semana=${prevWeek}`}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Semana anterior
-        </Link>
-        <Link
-          href="/agenda"
-          className="text-sm font-medium text-teal-600 hover:underline"
-        >
-          Semana atual
-        </Link>
-        <Link
-          href={`/agenda?semana=${nextWeek}`}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Próxima semana
-          <ChevronRight className="h-4 w-4" />
-        </Link>
-      </div>
+      <ViewTabs active="semana" />
+
+      <DayNavigation
+        prevHref={`/agenda?view=semana&semana=${prevWeek}`}
+        nextHref={`/agenda?view=semana&semana=${nextWeek}`}
+        currentHref="/agenda?view=semana"
+        currentLabel="Semana atual"
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         {Array.from({ length: 7 }, (_, i) => {
-          const day = new Date(weekStart);
-          day.setDate(day.getDate() + i);
+          const day = addDays(weekStart, i);
           const dayKey = format(day, "yyyy-MM-dd");
           const dayAppointments = grouped.get(dayKey) || [];
+          const today = isToday(day);
 
           return (
-            <Card key={dayKey} className={dayAppointments.length === 0 ? "opacity-80" : ""}>
+            <Card
+              key={dayKey}
+              className={today ? "ring-2 ring-teal-200" : dayAppointments.length === 0 ? "opacity-80" : ""}
+            >
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold capitalize text-slate-900">
                   {format(day, "EEEE, d/MM", { locale: ptBR })}
+                  {today && (
+                    <span className="ml-2 rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+                      Hoje
+                    </span>
+                  )}
                 </h2>
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
                   {dayAppointments.length} consulta(s)
@@ -90,9 +178,7 @@ export default async function AgendaPage({
               </div>
 
               {dayAppointments.length === 0 ? (
-                <p className="py-4 text-center text-sm text-slate-400">
-                  Sem consultas
-                </p>
+                <p className="py-4 text-center text-sm text-slate-400">Sem consultas</p>
               ) : (
                 <ul className="space-y-2">
                   {dayAppointments.map((apt) => (
@@ -122,6 +208,103 @@ export default async function AgendaPage({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function AgendaHeader({
+  title,
+  subtitle,
+  isToday,
+}: {
+  title: string;
+  subtitle: string;
+  isToday?: boolean;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
+        <p className="capitalize text-slate-600">
+          {subtitle}
+          {isToday && (
+            <span className="ml-2 rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+              Hoje
+            </span>
+          )}
+        </p>
+      </div>
+      <Link
+        href="/agenda/novo"
+        className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-700"
+      >
+        <Plus className="h-4 w-4" />
+        Novo agendamento
+      </Link>
+    </div>
+  );
+}
+
+function ViewTabs({ active }: { active: "hoje" | "semana" }) {
+  return (
+    <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+      <Link
+        href="/agenda?view=hoje"
+        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+          active === "hoje"
+            ? "bg-teal-600 text-white"
+            : "text-slate-600 hover:bg-slate-50"
+        }`}
+      >
+        Hoje
+      </Link>
+      <Link
+        href="/agenda?view=semana"
+        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+          active === "semana"
+            ? "bg-teal-600 text-white"
+            : "text-slate-600 hover:bg-slate-50"
+        }`}
+      >
+        Semana
+      </Link>
+    </div>
+  );
+}
+
+function DayNavigation({
+  prevHref,
+  nextHref,
+  currentHref,
+  currentLabel,
+}: {
+  prevHref: string;
+  nextHref: string;
+  currentHref: string;
+  currentLabel: string;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <Link
+        href={prevHref}
+        className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Anterior
+      </Link>
+      <Link
+        href={currentHref}
+        className="text-sm font-medium text-teal-600 hover:underline"
+      >
+        {currentLabel}
+      </Link>
+      <Link
+        href={nextHref}
+        className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        Próximo
+        <ChevronRight className="h-4 w-4" />
+      </Link>
     </div>
   );
 }

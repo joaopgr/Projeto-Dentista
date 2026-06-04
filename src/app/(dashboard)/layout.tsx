@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import {
   Calendar,
   LayoutDashboard,
-  LogOut,
+  Package,
   Shield,
   Users,
 } from "lucide-react";
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/dashboard", label: "Início", icon: LayoutDashboard },
   { href: "/pacientes", label: "Pacientes", icon: Users },
   { href: "/agenda", label: "Agenda", icon: Calendar },
+  { href: "/estoque", label: "Estoque", icon: Package },
 ];
 
 export default async function DashboardLayout({
