@@ -69,21 +69,21 @@ export default async function DashboardPage() {
           label="Estoque baixo"
           value={lowStockCount}
           href="/estoque"
-          color="amber"
+          color="slate"
           alert={lowStockCount > 0}
         />
       </div>
 
       {lowStockCount > 0 && (
-        <div className="flex items-center gap-3 rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-200">
+            <AlertTriangle className="h-5 w-5 text-slate-600" />
           </div>
           <div className="flex-1">
-            <p className="font-medium text-amber-900">
+            <p className="font-medium text-slate-800">
               {lowStockCount} material(is) com estoque baixo
             </p>
-            <Link href="/estoque" className="text-sm text-amber-700 hover:underline">
+            <Link href="/estoque" className="text-sm text-teal-600 hover:underline">
               Verificar estoque →
             </Link>
           </div>
@@ -163,19 +163,19 @@ function StatCard({
   label: string;
   value: number;
   href: string;
-  color: "teal" | "blue" | "amber";
+  color: "teal" | "blue" | "slate";
   alert?: boolean;
 }) {
   const colors = {
     teal: "from-teal-500 to-teal-600 shadow-teal-500/20",
     blue: "from-sky-500 to-blue-600 shadow-sky-500/20",
-    amber: "from-amber-500 to-orange-500 shadow-amber-500/20",
+    slate: "from-slate-600 to-slate-700 shadow-slate-500/20",
   };
 
   return (
     <Link href={href} className="group">
       <div
-        className={`rounded-2xl bg-gradient-to-br ${colors[color]} p-5 text-white shadow-lg transition group-hover:scale-[1.02] group-hover:shadow-xl ${alert ? "ring-2 ring-amber-300 ring-offset-2" : ""}`}
+        className={`rounded-2xl bg-gradient-to-br ${colors[color]} p-5 text-white shadow-lg transition group-hover:scale-[1.02] group-hover:shadow-xl ${alert ? "ring-2 ring-slate-300 ring-offset-2" : ""}`}
       >
         <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
           {icon}

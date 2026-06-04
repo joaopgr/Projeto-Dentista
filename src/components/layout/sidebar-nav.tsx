@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Calendar,
+  DollarSign,
   LayoutDashboard,
   Package,
   Users,
@@ -15,6 +16,7 @@ const navItems = [
   { href: "/dashboard", label: "Início", icon: LayoutDashboard },
   { href: "/pacientes", label: "Pacientes", icon: Users },
   { href: "/agenda", label: "Agenda", icon: Calendar },
+  { href: "/financeiro", label: "Financeiro", icon: DollarSign },
   { href: "/estoque", label: "Estoque", icon: Package },
 ] as const;
 

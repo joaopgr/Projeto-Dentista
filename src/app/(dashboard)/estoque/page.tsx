@@ -47,12 +47,12 @@ export default async function EstoquePage({
       </div>
 
       {lowStockItems.length > 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <div className="flex items-center gap-2 text-amber-800">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center gap-2 text-slate-700">
             <AlertTriangle className="h-5 w-5" />
             <p className="font-semibold">Materiais com estoque baixo</p>
           </div>
-          <ul className="mt-2 space-y-1 text-sm text-amber-900">
+          <ul className="mt-2 space-y-1 text-sm text-slate-600">
             {lowStockItems.map((item) => (
               <li key={item.id}>
                 <Link href={`/estoque/${item.id}`} className="hover:underline">
@@ -106,12 +106,12 @@ export default async function EstoquePage({
                   return (
                     <tr
                       key={material.id}
-                      className={low ? "bg-amber-50/50 hover:bg-amber-50" : "hover:bg-slate-50"}
+                      className={low ? "bg-slate-50 hover:bg-slate-100" : "hover:bg-slate-50"}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {low && (
-                            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+                            <AlertTriangle className="h-4 w-4 shrink-0 text-slate-500" />
                           )}
                           <span className="font-medium text-slate-900">
                             {material.name}

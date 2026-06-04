@@ -122,3 +122,44 @@ export const DURATION_OPTIONS = Array.from({ length: (6 * 60) / 15 }, (_, i) => 
   const minutes = (i + 1) * 15;
   return { value: String(minutes), label: formatDurationMinutes(minutes) };
 });
+
+export type Payment = {
+  id: string;
+  user_id: string;
+  patient_id: string;
+  appointment_id: string | null;
+  description: string;
+  total_amount: number;
+  payment_method: string;
+  fee_percent: number;
+  fee_amount: number;
+  net_amount: number;
+  installments_count: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PaymentInstallment = {
+  id: string;
+  user_id: string;
+  payment_id: string;
+  installment_number: number;
+  amount: number;
+  due_date: string;
+  paid_at: string | null;
+  status: "pending" | "paid" | "cancelled";
+  created_at: string;
+  updated_at: string;
+};
+
+export type PaymentWithDetails = Payment & {
+  patients: Pick<Patient, "id" | "full_name">;
+  payment_installments: PaymentInstallment[];
+};
+
+export const INSTALLMENT_STATUS_LABELS = {
+  pending: "Pendente",
+  paid: "Recebido",
+  cancelled: "Cancelado",
+} as const;

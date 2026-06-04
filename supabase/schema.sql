@@ -170,3 +170,5 @@ create policy "Usuários atualizam seus materiais"
 create policy "Usuários excluem seus materiais"
   on public.materials for delete
   using (auth.uid() = user_id);
+
+-- Financeiro: execute também supabase/migrations/002_finance.sql

@@ -37,3 +37,21 @@ export function normalizeRelation<T>(value: T | T[] | null | undefined): T | nul
   if (value == null) return null;
   return Array.isArray(value) ? value[0] ?? null : value;
 }
+
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+export function parseMoneyInput(value: string): number {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return 0;
+  return parseInt(digits, 10) / 100;
+}
+
+export function formatMoneyInput(value: string): string {
+  const amount = parseMoneyInput(value);
+  return formatCurrency(amount);
+}
