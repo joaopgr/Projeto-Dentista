@@ -149,10 +149,10 @@ export function PaymentDetail({
                     type="button"
                     onClick={() => markPaid(inst)}
                     disabled={loadingId === inst.id}
-                    className="inline-flex items-center gap-1 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+                    className="inline-flex items-center gap-1 rounded-lg border border-teal-300 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-700 hover:bg-teal-100 disabled:opacity-60"
                   >
                     <Check className="h-3.5 w-3.5" />
-                    Receber
+                    Receber antes
                   </button>
                 )}
               </div>

@@ -3,12 +3,15 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DollarSign, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { settleDueInstallments } from "@/lib/finance-settle";
 import { Card } from "@/components/ui/card";
 import { getPaymentMethodLabel } from "@/lib/finance";
 import { formatCurrency, normalizeRelation } from "@/lib/utils";
 
 export default async function FinanceiroPage() {
   const supabase = await createClient();
+  await settleDueInstallments(supabase);
+
   const now = new Date();
   const monthStart = startOfMonth(now).toISOString();
   const monthEnd = endOfMonth(now).toISOString();
@@ -64,6 +67,12 @@ export default async function FinanceiroPage() {
           <Plus className="h-4 w-4" />
           Novo lançamento
         </Link>
+      </div>
+
+      <div className="rounded-xl border border-teal-200/80 bg-teal-50/50 px-4 py-3 text-sm text-teal-800">
+        Parcelas com vencimento no dia ou antes de hoje são contabilizadas
+        automaticamente em <strong>Recebidos</strong>. Ex.: 10x de R$ 100 — ao
+        chegar 01/07, R$ 100 sai de &quot;a receber&quot; e entra em recebidos.
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

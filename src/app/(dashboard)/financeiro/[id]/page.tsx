@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { settleDueInstallments } from "@/lib/finance-settle";
 import { PaymentDetail } from "@/components/finance/payment-detail";
 
 export default async function PaymentPage({
@@ -9,6 +10,7 @@ export default async function PaymentPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  await settleDueInstallments(supabase);
 
   const { data: payment } = await supabase
     .from("payments")
