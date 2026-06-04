@@ -58,8 +58,8 @@ export function MaterialForm({ material }: { material: Material }) {
       return;
     }
 
+    router.push("/estoque");
     router.refresh();
-    setLoading(false);
   }
 
   async function adjustStock(delta: number) {

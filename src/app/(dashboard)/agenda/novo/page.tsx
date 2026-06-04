@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState, Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { combineDateAndTime } from "@/lib/utils";
 import { Button, Card, Input, Select, Textarea } from "@/components/ui/form";
-import { APPOINTMENT_STATUS_LABELS, PROCEDURE_TYPES } from "@/types/database";
+import { APPOINTMENT_STATUS_LABELS, DURATION_OPTIONS, PROCEDURE_TYPES } from "@/types/database";
 import type { Patient } from "@/types/database";
 
 function NewAppointmentForm() {
@@ -19,7 +20,8 @@ function NewAppointmentForm() {
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     patient_id: preselected,
-    scheduled_at: "",
+    scheduled_date: "",
+    scheduled_time: "",
     duration_minutes: "60",
     procedure_type: "Consulta",
     status: "scheduled",
@@ -65,10 +67,16 @@ function NewAppointmentForm() {
       return;
     }
 
+    if (!form.scheduled_date || !form.scheduled_time) {
+      setError("Informe a data e o horário.");
+      setLoading(false);
+      return;
+    }
+
     const { error: insertError } = await supabase.from("appointments").insert({
       user_id: user.id,
       patient_id: form.patient_id,
-      scheduled_at: new Date(form.scheduled_at).toISOString(),
+      scheduled_at: combineDateAndTime(form.scheduled_date, form.scheduled_time),
       duration_minutes: parseInt(form.duration_minutes, 10),
       procedure_type: form.procedure_type,
       status: form.status,
@@ -116,24 +124,32 @@ function NewAppointmentForm() {
               ))}
             </Select>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <Input
-                label="Data e hora *"
-                type="datetime-local"
+                label="Data *"
+                type="date"
                 required
-                value={form.scheduled_at}
-                onChange={(e) => update("scheduled_at", e.target.value)}
+                value={form.scheduled_date}
+                onChange={(e) => update("scheduled_date", e.target.value)}
+              />
+              <Input
+                label="Horário *"
+                type="time"
+                required
+                step="900"
+                value={form.scheduled_time}
+                onChange={(e) => update("scheduled_time", e.target.value)}
               />
               <Select
-                label="Duração (minutos)"
+                label="Duração"
                 value={form.duration_minutes}
                 onChange={(e) => update("duration_minutes", e.target.value)}
               >
-                <option value="30">30 min</option>
-                <option value="45">45 min</option>
-                <option value="60">1 hora</option>
-                <option value="90">1h 30min</option>
-                <option value="120">2 horas</option>
+                {DURATION_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </Select>
             </div>
 

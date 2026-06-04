@@ -108,3 +108,17 @@ export function getUnitLabel(unit: string): string {
 export function isLowStock(material: Pick<Material, "quantity" | "min_quantity">): boolean {
   return material.min_quantity > 0 && material.quantity <= material.min_quantity;
 }
+
+export function formatDurationMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) return hours === 1 ? "1 hora" : `${hours} horas`;
+  return `${hours}h ${mins}min`;
+}
+
+/** Durações de 15 em 15 minutos até 6 horas */
+export const DURATION_OPTIONS = Array.from({ length: (6 * 60) / 15 }, (_, i) => {
+  const minutes = (i + 1) * 15;
+  return { value: String(minutes), label: formatDurationMinutes(minutes) };
+});

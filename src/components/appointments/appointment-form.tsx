@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { combineDateAndTime, splitScheduledAt } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button, Card, Input, Select, Textarea } from "@/components/ui/form";
 import {
   APPOINTMENT_STATUS_LABELS,
+  DURATION_OPTIONS,
   PROCEDURE_TYPES,
   type AppointmentWithPatient,
 } from "@/types/database";
@@ -24,13 +26,13 @@ export function AppointmentForm({
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
-  const scheduledLocal = format(
-    new Date(appointment.scheduled_at),
-    "yyyy-MM-dd'T'HH:mm"
+  const { date: initialDate, time: initialTime } = splitScheduledAt(
+    appointment.scheduled_at
   );
 
   const [form, setForm] = useState({
-    scheduled_at: scheduledLocal,
+    scheduled_date: initialDate,
+    scheduled_time: initialTime,
     duration_minutes: String(appointment.duration_minutes),
     procedure_type: appointment.procedure_type || "Consulta",
     status: appointment.status,
@@ -50,7 +52,7 @@ export function AppointmentForm({
     const { error: updateError } = await supabase
       .from("appointments")
       .update({
-        scheduled_at: new Date(form.scheduled_at).toISOString(),
+        scheduled_at: combineDateAndTime(form.scheduled_date, form.scheduled_time),
         duration_minutes: parseInt(form.duration_minutes, 10),
         procedure_type: form.procedure_type,
         status: form.status,
@@ -64,8 +66,8 @@ export function AppointmentForm({
       return;
     }
 
+    router.push("/agenda");
     router.refresh();
-    setLoading(false);
   }
 
   async function handleDelete() {
@@ -94,24 +96,32 @@ export function AppointmentForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <Input
-            label="Data e hora"
-            type="datetime-local"
+            label="Data"
+            type="date"
             required
-            value={form.scheduled_at}
-            onChange={(e) => update("scheduled_at", e.target.value)}
+            value={form.scheduled_date}
+            onChange={(e) => update("scheduled_date", e.target.value)}
+          />
+          <Input
+            label="Horário"
+            type="time"
+            required
+            step="900"
+            value={form.scheduled_time}
+            onChange={(e) => update("scheduled_time", e.target.value)}
           />
           <Select
-            label="Duração (minutos)"
+            label="Duração"
             value={form.duration_minutes}
             onChange={(e) => update("duration_minutes", e.target.value)}
           >
-            <option value="30">30 min</option>
-            <option value="45">45 min</option>
-            <option value="60">1 hora</option>
-            <option value="90">1h 30min</option>
-            <option value="120">2 horas</option>
+            {DURATION_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </Select>
         </div>
 
