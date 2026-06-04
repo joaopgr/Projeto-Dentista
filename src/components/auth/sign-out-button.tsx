@@ -3,8 +3,15 @@
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
-export function SignOutButton({ compact }: { compact?: boolean }) {
+export function SignOutButton({
+  compact,
+  light,
+}: {
+  compact?: boolean;
+  light?: boolean;
+}) {
   const router = useRouter();
 
   async function handleSignOut() {
@@ -17,7 +24,12 @@ export function SignOutButton({ compact }: { compact?: boolean }) {
   return (
     <button
       onClick={handleSignOut}
-      className="mt-2 flex items-center gap-2 text-sm text-slate-500 hover:text-red-600"
+      className={cn(
+        "mt-2 flex items-center gap-2 text-sm transition",
+        light
+          ? "text-teal-200/80 hover:text-white"
+          : "text-slate-500 hover:text-red-600"
+      )}
     >
       <LogOut className="h-4 w-4" />
       {!compact && "Sair"}

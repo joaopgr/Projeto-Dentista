@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState, Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { checkAppointmentConflict, formatConflictMessage } from "@/lib/appointments";
 import { combineDateAndTime } from "@/lib/utils";
 import { Button, Card, Input, Select, Textarea } from "@/components/ui/form";
 import { APPOINTMENT_STATUS_LABELS, DURATION_OPTIONS, PROCEDURE_TYPES } from "@/types/database";
@@ -73,11 +74,34 @@ function NewAppointmentForm() {
       return;
     }
 
+    const duration = parseInt(form.duration_minutes, 10);
+
+    const { conflict, error: conflictError } = await checkAppointmentConflict(
+      supabase,
+      {
+        date: form.scheduled_date,
+        time: form.scheduled_time,
+        durationMinutes: duration,
+      }
+    );
+
+    if (conflictError) {
+      setError(conflictError);
+      setLoading(false);
+      return;
+    }
+
+    if (conflict) {
+      setError(formatConflictMessage(conflict));
+      setLoading(false);
+      return;
+    }
+
     const { error: insertError } = await supabase.from("appointments").insert({
       user_id: user.id,
       patient_id: form.patient_id,
       scheduled_at: combineDateAndTime(form.scheduled_date, form.scheduled_time),
-      duration_minutes: parseInt(form.duration_minutes, 10),
+      duration_minutes: duration,
       procedure_type: form.procedure_type,
       status: form.status,
       notes: form.notes.trim() || null,

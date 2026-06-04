@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { checkAppointmentConflict, formatConflictMessage } from "@/lib/appointments";
 import { combineDateAndTime, splitScheduledAt } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -49,11 +50,35 @@ export function AppointmentForm({
     setLoading(true);
 
     const supabase = createClient();
+    const duration = parseInt(form.duration_minutes, 10);
+
+    const { conflict, error: conflictError } = await checkAppointmentConflict(
+      supabase,
+      {
+        date: form.scheduled_date,
+        time: form.scheduled_time,
+        durationMinutes: duration,
+        excludeId: appointment.id,
+      }
+    );
+
+    if (conflictError) {
+      setError(conflictError);
+      setLoading(false);
+      return;
+    }
+
+    if (conflict) {
+      setError(formatConflictMessage(conflict));
+      setLoading(false);
+      return;
+    }
+
     const { error: updateError } = await supabase
       .from("appointments")
       .update({
         scheduled_at: combineDateAndTime(form.scheduled_date, form.scheduled_time),
-        duration_minutes: parseInt(form.duration_minutes, 10),
+        duration_minutes: duration,
         procedure_type: form.procedure_type,
         status: form.status,
         notes: form.notes.trim() || null,
