@@ -10,13 +10,13 @@ import { ClientPortalView } from "@/components/portal/client-portal-view";
 export default async function PortalPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(CLIENT_SESSION_COOKIE)?.value;
-  const patientId = token ? await verifyClientSessionToken(token) : null;
+  const session = token ? await verifyClientSessionToken(token) : null;
 
-  if (!patientId) {
+  if (!session) {
     redirect("/login");
   }
 
-  const data = await getPortalData(patientId);
+  const data = await getPortalData(session.patientId, session.cpf);
 
   if (!data) {
     redirect("/login");

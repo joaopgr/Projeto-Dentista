@@ -1,6 +1,11 @@
 export const CLIENT_SESSION_COOKIE = "odontoclinic_client";
 const SESSION_DAYS = 7;
 
+export type ClientSession = {
+  patientId: string;
+  cpf: string;
+};
+
 function getSecret(): string {
   return (
     process.env.CLIENT_SESSION_SECRET ||
@@ -28,25 +33,34 @@ async function hmacSign(message: string): Promise<string> {
 }
 
 export async function createClientSessionToken(
-  patientId: string
+  patientId: string,
+  cpf: string
 ): Promise<string> {
   const exp = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
-  const payload = `${patientId}.${exp}`;
+  const payload = `${patientId}.${cpf}.${exp}`;
   const sig = await hmacSign(payload);
   return `${payload}.${sig}`;
 }
 
 export async function verifyClientSessionToken(
   token: string
-): Promise<string | null> {
-  const parts = token.split(".");
+): Promise<ClientSession | null> {
+  const lastDot = token.lastIndexOf(".");
+  if (lastDot === -1) return null;
+
+  const sig = token.slice(lastDot + 1);
+  const payload = token.slice(0, lastDot);
+  const parts = payload.split(".");
+
   if (parts.length !== 3) return null;
 
-  const [patientId, expStr, sig] = parts;
+  const [patientId, cpf, expStr] = parts;
   const exp = parseInt(expStr, 10);
-  if (!patientId || Number.isNaN(exp) || Date.now() > exp) return null;
+  if (!patientId || !cpf || cpf.length !== 11 || Number.isNaN(exp) || Date.now() > exp) {
+    return null;
+  }
 
-  const expected = await hmacSign(`${patientId}.${expStr}`);
+  const expected = await hmacSign(`${patientId}.${cpf}.${expStr}`);
   if (sig.length !== expected.length) return null;
 
   let match = true;
@@ -55,7 +69,15 @@ export async function verifyClientSessionToken(
   }
   if (!match) return null;
 
-  return patientId;
+  return { patientId, cpf };
+}
+
+/** Compatível com middleware que só precisa do id */
+export async function verifyClientSessionPatientId(
+  token: string
+): Promise<string | null> {
+  const session = await verifyClientSessionToken(token);
+  return session?.patientId ?? null;
 }
 
 export function clientSessionCookieOptions(maxAgeSeconds = SESSION_DAYS * 86400) {

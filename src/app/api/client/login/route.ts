@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: 401 });
   }
 
-  const token = await createClientSessionToken(result.patientId);
+  const token = await createClientSessionToken(result.patientId, result.cpf);
   const cookieStore = await cookies();
   cookieStore.set(CLIENT_SESSION_COOKIE, token, clientSessionCookieOptions());
 

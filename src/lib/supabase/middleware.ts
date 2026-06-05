@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import {
   CLIENT_SESSION_COOKIE,
-  verifyClientSessionToken,
+  verifyClientSessionPatientId,
 } from "@/lib/client-session";
 
 type CookieToSet = {
@@ -47,7 +47,7 @@ export async function updateSession(request: NextRequest) {
 
   const clientToken = request.cookies.get(CLIENT_SESSION_COOKIE)?.value;
   const clientPatientId = clientToken
-    ? await verifyClientSessionToken(clientToken)
+    ? await verifyClientSessionPatientId(clientToken)
     : null;
 
   if (user && clientPatientId) {

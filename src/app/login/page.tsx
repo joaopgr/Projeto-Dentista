@@ -139,7 +139,7 @@ export default function LoginPage() {
                 autoComplete="username"
               />
               <Input
-                label="Senha (CPF)"
+                label="Senha"
                 required
                 value={cpfPassword}
                 onChange={(e) => setCpfPassword(formatCPF(e.target.value))}

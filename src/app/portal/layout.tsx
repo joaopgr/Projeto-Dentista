@@ -3,7 +3,7 @@ import { Shield } from "lucide-react";
 import { cookies } from "next/headers";
 import {
   CLIENT_SESSION_COOKIE,
-  verifyClientSessionToken,
+  verifyClientSessionPatientId,
 } from "@/lib/client-session";
 import { ClientSignOutButton } from "@/components/portal/client-sign-out-button";
 
@@ -14,7 +14,7 @@ export default async function PortalLayout({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get(CLIENT_SESSION_COOKIE)?.value;
-  const patientId = token ? await verifyClientSessionToken(token) : null;
+  const patientId = token ? await verifyClientSessionPatientId(token) : null;
 
   if (!patientId) {
     redirect("/login");

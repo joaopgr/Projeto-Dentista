@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Appointment, Patient, Payment, PaymentInstallment } from "@/types/database";
 
@@ -12,12 +13,51 @@ export type PortalData = {
   payments: PortalPayment[];
 };
 
+function normalizeCpf(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
+async function loginViaRpc(
+  cpf: string,
+  password: string
+): Promise<{ patientId: string | null; rpcMissing: boolean }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("client_portal_login", {
+    cpf_input: cpf,
+    cpf_password: password,
+  });
+
+  if (error) {
+    const rpcMissing =
+      error.code === "42883" ||
+      error.message.includes("client_portal_login") ||
+      error.message.includes("Could not find the function");
+    return { patientId: null, rpcMissing };
+  }
+
+  return { patientId: (data as string | null) ?? null, rpcMissing: false };
+}
+
+async function loginViaAdmin(cpf: string): Promise<string | null> {
+  try {
+    const admin = createAdminClient();
+    const { data: patient } = await admin
+      .from("patients")
+      .select("id")
+      .eq("cpf", cpf)
+      .maybeSingle();
+    return patient?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function authenticateClientByCpf(
   cpfInput: string,
   cpfPassword: string
-): Promise<{ patientId: string } | { error: string }> {
-  const cpf = cpfInput.replace(/\D/g, "");
-  const password = cpfPassword.replace(/\D/g, "");
+): Promise<{ patientId: string; cpf: string } | { error: string }> {
+  const cpf = normalizeCpf(cpfInput);
+  const password = normalizeCpf(cpfPassword);
 
   if (cpf.length !== 11) {
     return { error: "Informe um CPF válido com 11 dígitos." };
@@ -27,60 +67,43 @@ export async function authenticateClientByCpf(
     return { error: "CPF e senha não conferem." };
   }
 
-  let admin;
-  try {
-    admin = createAdminClient();
-  } catch {
-    return { error: "Portal do cliente indisponível. Contate a clínica." };
+  let patientId: string | null = null;
+  let rpcMissing = false;
+
+  const rpcResult = await loginViaRpc(cpf, password);
+  patientId = rpcResult.patientId;
+  rpcMissing = rpcResult.rpcMissing;
+
+  if (!patientId) {
+    patientId = await loginViaAdmin(cpf);
   }
 
-  const { data: patient, error } = await admin
-    .from("patients")
-    .select("id")
-    .eq("cpf", cpf)
-    .maybeSingle();
+  if (!patientId) {
+    if (rpcMissing) {
+      return {
+        error:
+          "Portal do cliente não configurado. Execute a migração 004_client_portal.sql no Supabase.",
+      };
+    }
 
-  if (error || !patient) {
     return {
       error:
         "CPF não encontrado. Verifique se está cadastrado na clínica ou contate o consultório.",
     };
   }
 
-  return { patientId: patient.id };
+  return { patientId, cpf };
 }
 
-export async function getPortalData(patientId: string): Promise<PortalData | null> {
-  let admin;
-  try {
-    admin = createAdminClient();
-  } catch {
-    return null;
-  }
+type RpcPortalResponse = {
+  patient: Patient;
+  appointments: Appointment[];
+  payments: PortalPayment[];
+};
 
-  const { data: patient } = await admin
-    .from("patients")
-    .select("*")
-    .eq("id", patientId)
-    .single();
-
-  if (!patient) return null;
-
-  const { data: appointments } = await admin
-    .from("appointments")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("scheduled_at", { ascending: false });
-
-  const { data: payments } = await admin
-    .from("payments")
-    .select("*, payment_installments(*)")
-    .eq("patient_id", patientId)
-    .order("created_at", { ascending: false });
-
+function splitAppointments(appointments: Appointment[]) {
   const now = new Date();
-  const allAppointments = appointments || [];
-  const upcomingAppointments = allAppointments
+  const upcomingAppointments = appointments
     .filter(
       (a) =>
         new Date(a.scheduled_at) >= now &&
@@ -91,16 +114,85 @@ export async function getPortalData(patientId: string): Promise<PortalData | nul
         new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
     );
 
-  const pastAppointments = allAppointments.filter(
+  const pastAppointments = appointments.filter(
     (a) =>
       new Date(a.scheduled_at) < now ||
       ["completed", "cancelled", "no_show"].includes(a.status)
   );
 
+  return { upcomingAppointments, pastAppointments };
+}
+
+async function getPortalDataViaRpc(
+  patientId: string,
+  cpf: string
+): Promise<PortalData | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("client_portal_get_data", {
+    patient_id: patientId,
+    cpf_input: cpf,
+  });
+
+  if (error || !data) return null;
+
+  const parsed = data as RpcPortalResponse;
+  const { upcomingAppointments, pastAppointments } = splitAppointments(
+    parsed.appointments || []
+  );
+
   return {
-    patient,
+    patient: parsed.patient,
     upcomingAppointments,
     pastAppointments,
-    payments: (payments || []) as PortalPayment[],
+    payments: parsed.payments || [],
   };
+}
+
+async function getPortalDataViaAdmin(patientId: string): Promise<PortalData | null> {
+  try {
+    const admin = createAdminClient();
+
+    const { data: patient } = await admin
+      .from("patients")
+      .select("*")
+      .eq("id", patientId)
+      .single();
+
+    if (!patient) return null;
+
+    const { data: appointments } = await admin
+      .from("appointments")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("scheduled_at", { ascending: false });
+
+    const { data: payments } = await admin
+      .from("payments")
+      .select("*, payment_installments(*)")
+      .eq("patient_id", patientId)
+      .order("created_at", { ascending: false });
+
+    const { upcomingAppointments, pastAppointments } = splitAppointments(
+      appointments || []
+    );
+
+    return {
+      patient,
+      upcomingAppointments,
+      pastAppointments,
+      payments: (payments || []) as PortalPayment[],
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function getPortalData(
+  patientId: string,
+  cpf: string
+): Promise<PortalData | null> {
+  const viaRpc = await getPortalDataViaRpc(patientId, cpf);
+  if (viaRpc) return viaRpc;
+
+  return getPortalDataViaAdmin(patientId);
 }

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import {
   CLIENT_SESSION_COOKIE,
-  verifyClientSessionToken,
+  verifyClientSessionPatientId,
 } from "@/lib/client-session";
 
 export default async function HomePage() {
@@ -18,7 +18,7 @@ export default async function HomePage() {
 
   const cookieStore = await cookies();
   const token = cookieStore.get(CLIENT_SESSION_COOKIE)?.value;
-  const patientId = token ? await verifyClientSessionToken(token) : null;
+  const patientId = token ? await verifyClientSessionPatientId(token) : null;
 
   if (patientId) {
     redirect("/portal");
