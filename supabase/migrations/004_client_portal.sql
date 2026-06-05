@@ -1,7 +1,10 @@
 -- ============================================================
 -- Migração: Portal do cliente (login por CPF)
--- Execute no SQL Editor do Supabase (pode rodar de novo com CREATE OR REPLACE)
+-- Execute no SQL Editor do Supabase (pode rodar de novo)
 -- ============================================================
+
+-- Necessário se a função já existir com outro tipo de retorno (json → jsonb)
+drop function if exists public.client_portal_get_data(uuid, text);
 
 create or replace function public.client_portal_login(
   cpf_input text,
