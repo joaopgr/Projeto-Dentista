@@ -22,10 +22,7 @@ export function PatientTableRows({ patients }: { patients: Patient[] }) {
           <td className="px-4 py-3 text-slate-600">
             {formatPhone(patient.phone)}
           </td>
-          <td className="px-4 py-3 text-slate-600 hidden sm:table-cell">
-            {patient.email || "—"}
-          </td>
-          <td className="px-4 py-3 text-slate-600 hidden md:table-cell">
+          <td className="px-4 py-3 text-slate-600">
             {patient.cpf ? formatCPF(patient.cpf) : "—"}
           </td>
           <td className="px-4 py-3 text-right">

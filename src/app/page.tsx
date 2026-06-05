@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import {
+  CLIENT_SESSION_COOKIE,
+  verifyClientSessionToken,
+} from "@/lib/client-session";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -7,5 +12,17 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  redirect(user ? "/dashboard" : "/login");
+  if (user) {
+    redirect("/dashboard");
+  }
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get(CLIENT_SESSION_COOKIE)?.value;
+  const patientId = token ? await verifyClientSessionToken(token) : null;
+
+  if (patientId) {
+    redirect("/portal");
+  }
+
+  redirect("/login");
 }

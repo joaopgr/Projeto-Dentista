@@ -1,5 +1,9 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  CLIENT_SESSION_COOKIE,
+  verifyClientSessionToken,
+} from "@/lib/client-session";
 
 type CookieToSet = {
   name: string;
@@ -35,15 +39,54 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login");
+  const pathname = request.nextUrl.pathname;
+  const isAuthPage = pathname.startsWith("/login");
+  const isPortal = pathname.startsWith("/portal");
+  const isClientApi = pathname.startsWith("/api/client");
+  const isHome = pathname === "/";
 
-  if (!user && !isAuthPage && request.nextUrl.pathname !== "/") {
+  const clientToken = request.cookies.get(CLIENT_SESSION_COOKIE)?.value;
+  const clientPatientId = clientToken
+    ? await verifyClientSessionToken(clientToken)
+    : null;
+
+  if (user && clientPatientId) {
+    supabaseResponse.cookies.delete(CLIENT_SESSION_COOKIE);
+  }
+
+  const effectiveClientId = user ? null : clientPatientId;
+
+  if (effectiveClientId && (isAuthPage || isHome)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/portal";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && isPortal) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  if (effectiveClientId && !isPortal && !isClientApi && !isAuthPage && !isHome) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/portal";
+    return NextResponse.redirect(url);
+  }
+
+  if (isPortal && !effectiveClientId) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && (isAuthPage || request.nextUrl.pathname === "/")) {
+  if (!user && !effectiveClientId && !isAuthPage && !isHome && !isClientApi) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && (isAuthPage || isHome)) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

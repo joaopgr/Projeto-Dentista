@@ -75,8 +75,7 @@ export default async function PatientsPage({
                 <tr>
                   <th className="px-4 py-3 font-semibold text-slate-700">Nome</th>
                   <th className="px-4 py-3 font-semibold text-slate-700">Telefone</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700 hidden sm:table-cell">E-mail</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700 hidden md:table-cell">CPF</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700">CPF</th>
                   <th className="px-4 py-3 font-semibold text-slate-700"></th>
                 </tr>
               </thead>
