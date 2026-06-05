@@ -33,42 +33,51 @@ export default async function ConfirmAppointmentPage({
           </div>
         </div>
 
-        {!result.ok && result.error === "not_found" && (
-          <ResultBlock
-            icon={<Shield className="h-10 w-10 text-slate-400" />}
-            title="Link inválido"
-            message="Este link não existe ou já expirou. Entre em contato com a clínica."
-          />
-        )}
-
-        {!result.ok && result.error === "rpc_error" && (
-          <ResultBlock
-            icon={<Shield className="h-10 w-10 text-amber-500" />}
-            title="Sistema indisponível"
-            message="Execute a migração 005_appointment_reminders.sql no Supabase e tente novamente."
-          />
-        )}
-
-        {!result.ok && result.error === "already_final" && (
-          <ResultBlock
-            icon={<CalendarCheck className="h-10 w-10 text-teal-600" />}
-            title="Consulta já processada"
-            message={
-              <>
-                {result.patientName && (
-                  <span className="block font-medium text-slate-800">
-                    {result.patientName}
-                  </span>
-                )}
-                Status atual:{" "}
-                <strong>
-                  {APPOINTMENT_STATUS_LABELS[
-                    result.status as keyof typeof APPOINTMENT_STATUS_LABELS
-                  ] || result.status}
-                </strong>
-              </>
-            }
-          />
+        {!result.ok && (
+          <>
+            {result.error === "not_found" && (
+              <ResultBlock
+                icon={<Shield className="h-10 w-10 text-slate-400" />}
+                title="Link inválido"
+                message="Este link não existe ou já expirou. Entre em contato com a clínica."
+              />
+            )}
+            {result.error === "rpc_error" && (
+              <ResultBlock
+                icon={<Shield className="h-10 w-10 text-amber-500" />}
+                title="Sistema indisponível"
+                message="Execute a migração 005_appointment_reminders.sql no Supabase. Use o link enviado pelo site (projeto-dentista-beige.vercel.app), não localhost."
+              />
+            )}
+            {result.error === "already_final" && (
+              <ResultBlock
+                icon={<CalendarCheck className="h-10 w-10 text-teal-600" />}
+                title="Consulta já processada"
+                message={
+                  <>
+                    {result.patientName && (
+                      <span className="block font-medium text-slate-800">
+                        {result.patientName}
+                      </span>
+                    )}
+                    Status atual:{" "}
+                    <strong>
+                      {APPOINTMENT_STATUS_LABELS[
+                        result.status as keyof typeof APPOINTMENT_STATUS_LABELS
+                      ] || result.status}
+                    </strong>
+                  </>
+                }
+              />
+            )}
+            {result.error === "invalid_action" && (
+              <ResultBlock
+                icon={<Shield className="h-10 w-10 text-slate-400" />}
+                title="Ação inválida"
+                message="Use o link de confirmar ou cancelar enviado na mensagem."
+              />
+            )}
+          </>
         )}
 
         {result.ok && (

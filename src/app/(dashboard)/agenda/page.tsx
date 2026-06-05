@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { TomorrowRemindersPanel } from "@/components/appointments/tomorrow-reminders-panel";
 import { fetchTomorrowReminders } from "@/lib/appointments/tomorrow-reminders";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { normalizeRelation } from "@/lib/utils";
 import { APPOINTMENT_STATUS_LABELS, type AppointmentWithPatient } from "@/types/database";
 
@@ -55,6 +56,7 @@ async function TodayView({ dia }: { dia?: string }) {
 
   const list = normalizeAppointments(appointments);
   const tomorrowReminders = await fetchTomorrowReminders();
+  const appUrl = getAppBaseUrl();
 
   return (
     <div className="space-y-6">
@@ -64,7 +66,7 @@ async function TodayView({ dia }: { dia?: string }) {
         isToday={isToday(dayStart)}
       />
 
-      <TomorrowRemindersPanel appointments={tomorrowReminders} />
+      <TomorrowRemindersPanel appointments={tomorrowReminders} appUrl={appUrl} />
 
       <ViewTabs active="hoje" />
 
@@ -141,6 +143,7 @@ async function WeekView({ semana }: { semana?: string }) {
 
   const grouped = groupByDay(normalizeAppointments(appointments));
   const tomorrowReminders = await fetchTomorrowReminders();
+  const appUrl = getAppBaseUrl();
 
   return (
     <div className="space-y-6">
@@ -149,7 +152,7 @@ async function WeekView({ semana }: { semana?: string }) {
         subtitle={`${format(weekStart, "d MMM", { locale: ptBR })} — ${format(weekEnd, "d MMM yyyy", { locale: ptBR })}`}
       />
 
-      <TomorrowRemindersPanel appointments={tomorrowReminders} />
+      <TomorrowRemindersPanel appointments={tomorrowReminders} appUrl={appUrl} />
 
       <ViewTabs active="semana" />
 

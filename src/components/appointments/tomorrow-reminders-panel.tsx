@@ -12,8 +12,10 @@ import type { ReminderAppointment } from "@/lib/appointments/tomorrow-reminders"
 
 export function TomorrowRemindersPanel({
   appointments,
+  appUrl,
 }: {
   appointments: ReminderAppointment[];
+  appUrl: string;
 }) {
   if (!appointments.length) return null;
 
@@ -42,19 +44,25 @@ export function TomorrowRemindersPanel({
 
       <ul className="space-y-3">
         {appointments.map((apt) => (
-          <ReminderRow key={apt.id} appointment={apt} />
+          <ReminderRow key={apt.id} appointment={apt} appUrl={appUrl} />
         ))}
       </ul>
     </div>
   );
 }
 
-function ReminderRow({ appointment }: { appointment: ReminderAppointment }) {
+function ReminderRow({
+  appointment,
+  appUrl,
+}: {
+  appointment: ReminderAppointment;
+  appUrl: string;
+}) {
   const [copied, setCopied] = useState(false);
   const [marking, setMarking] = useState(false);
   const [sent, setSent] = useState(!!appointment.reminder_sent_at);
 
-  const message = buildReminderMessage(appointment);
+  const message = buildReminderMessage(appointment, appUrl);
   const whatsappUrl = buildWhatsAppUrl(appointment.patients.phone, message);
   const time = format(new Date(appointment.scheduled_at), "HH:mm");
 

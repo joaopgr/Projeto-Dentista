@@ -1,24 +1,17 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { BRAND } from "@/lib/branding";
 import type { AppointmentWithPatient } from "@/types/database";
 
-export function getAppBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "http://localhost:3000";
+export function getConfirmUrl(token: string, baseUrl?: string): string {
+  const base = baseUrl ?? getAppBaseUrl();
+  return `${base}/c/${token}`;
 }
 
-export function getConfirmUrl(token: string): string {
-  return `${getAppBaseUrl()}/c/${token}`;
-}
-
-export function getCancelUrl(token: string): string {
-  return `${getAppBaseUrl()}/c/${token}?acao=cancelar`;
+export function getCancelUrl(token: string, baseUrl?: string): string {
+  const base = baseUrl ?? getAppBaseUrl();
+  return `${base}/c/${token}?acao=cancelar`;
 }
 
 export function phoneToWhatsApp(phone: string): string {
@@ -39,9 +32,14 @@ export function buildReminderMessage(
     "scheduled_at" | "procedure_type" | "confirmation_token"
   > & {
     patients: Pick<AppointmentWithPatient["patients"], "full_name">;
-  }
+  },
+  baseUrl?: string
 ): string {
   const token = appointment.confirmation_token;
+  if (!token) {
+    return "Erro: consulta sem link de confirmação. Atualize o sistema (migração 005).";
+  }
+
   const date = format(new Date(appointment.scheduled_at), "dd/MM/yyyy", {
     locale: ptBR,
   });
@@ -55,8 +53,8 @@ export function buildReminderMessage(
     `Lembrete da *${BRAND.name}*:\n` +
     `Você tem *${procedure}* agendada para *${date}* às *${time}*.\n\n` +
     `Por favor, confirme ou cancele:\n` +
-    `✅ Confirmar: ${getConfirmUrl(token)}\n` +
-    `❌ Cancelar: ${getCancelUrl(token)}\n\n` +
+    `✅ Confirmar: ${getConfirmUrl(token, baseUrl)}\n` +
+    `❌ Cancelar: ${getCancelUrl(token, baseUrl)}\n\n` +
     `${BRAND.tagline}`
   );
 }

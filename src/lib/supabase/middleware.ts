@@ -93,5 +93,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Funcionário logado pode abrir link de confirmação do paciente (/c/...)
+  if (user && isPublicConfirm) {
+    return supabaseResponse;
+  }
+
   return supabaseResponse;
 }
