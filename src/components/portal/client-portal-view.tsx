@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Calendar, CreditCard, User } from "lucide-react";
 import { getPaymentMethodLabel, sumPaid, sumPending } from "@/lib/finance";
+import { BRAND } from "@/lib/branding";
 import { cn, formatCPF, formatCurrency, formatPhone, splitScheduledAt } from "@/lib/utils";
 import {
   APPOINTMENT_STATUS_LABELS,
@@ -58,11 +59,12 @@ export function ClientPortalView({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-teal-100 bg-teal-50/60 p-5">
+      <div className="rounded-2xl border border-teal-200/80 bg-gradient-to-br from-teal-50 to-white p-5 shadow-sm">
         <p className="text-sm font-medium text-teal-800">
           Bem-vindo(a), <span className="font-semibold">{patient.full_name}</span>!
         </p>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-xs text-teal-700/70">{BRAND.name}</p>
+        <p className="mt-2 text-sm text-slate-600">
           Acompanhe suas consultas e pagamentos
         </p>
       </div>

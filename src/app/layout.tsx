@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { BRAND } from "@/lib/branding";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "OdontoClinic - Gestão de Consultório",
-  description: "Sistema de gestão para consultório odontológico",
+  title: `${BRAND.name} — ${BRAND.dentist}`,
+  description: BRAND.description,
 };
 
 export default function RootLayout({

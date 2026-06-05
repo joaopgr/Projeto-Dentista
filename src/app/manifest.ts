@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { BRAND } from "@/lib/branding";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "OdontoClinic",
-    short_name: "OdontoClinic",
-    description: "Gestão de consultório odontológico",
+    name: BRAND.name,
+    short_name: BRAND.shortName,
+    description: BRAND.description,
     start_url: "/",
     display: "standalone",
     background_color: "#f8fafc",

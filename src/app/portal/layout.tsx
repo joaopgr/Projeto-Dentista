@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { Shield } from "lucide-react";
 import { cookies } from "next/headers";
 import {
   CLIENT_SESSION_COOKIE,
   verifyClientSessionPatientId,
 } from "@/lib/client-session";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { ClientSignOutButton } from "@/components/portal/client-sign-out-button";
 
 export default async function PortalLayout({
@@ -21,18 +21,10 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50/80 via-slate-50 to-slate-100">
+      <header className="border-b border-teal-100/80 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white">
-              <Shield className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="font-bold text-slate-900">OdontoClinic</p>
-              <p className="text-xs text-slate-500">Área do paciente</p>
-            </div>
-          </div>
+          <BrandLogo variant="portal" />
           <ClientSignOutButton />
         </div>
       </header>

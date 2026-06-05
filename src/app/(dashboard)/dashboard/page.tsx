@@ -3,6 +3,7 @@ import { format, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AlertTriangle, Calendar, ChevronRight, Clock, Package, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { BRAND } from "@/lib/branding";
 import { Card } from "@/components/ui/card";
 import { normalizeRelation } from "@/lib/utils";
 import { APPOINTMENT_STATUS_LABELS, isLowStock } from "@/types/database";
@@ -41,10 +42,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl bg-gradient-to-r from-teal-600 to-teal-700 p-6 text-white shadow-lg shadow-teal-600/20">
-        <p className="text-sm font-medium text-teal-100">Bem-vindo de volta</p>
-        <h1 className="mt-1 text-2xl font-bold">Painel do consultório</h1>
-        <p className="mt-2 capitalize text-teal-100/90">
+      <div className="rounded-2xl bg-gradient-to-r from-teal-700 via-teal-600 to-teal-700 p-6 text-white shadow-lg shadow-teal-700/25 ring-1 ring-white/10">
+        <p className="text-sm font-medium text-teal-100">{BRAND.name}</p>
+        <h1 className="mt-1 text-2xl font-bold">Painel administrativo</h1>
+        <p className="mt-1 text-sm text-teal-100/90">{BRAND.tagline}</p>
+        <p className="mt-3 capitalize text-teal-50/80">
           {format(today, "EEEE, d 'de' MMMM", { locale: ptBR })}
         </p>
       </div>

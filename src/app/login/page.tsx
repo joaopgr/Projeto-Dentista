@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { Shield, User, Users } from "lucide-react";
+import { User, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatCPF } from "@/lib/utils";
 import { Button, Card, Input } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 type LoginMode = "client" | "staff";
 
@@ -69,22 +70,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.1),transparent_50%)]" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+      <div className="absolute inset-0 bg-gradient-to-br from-teal-950 via-teal-900 to-slate-950" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(20,184,166,0.15),transparent_50%)]" />
 
       <div className="relative w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20 backdrop-blur-sm">
-            <Shield className="h-8 w-8" />
-          </div>
-          <h1 className="text-3xl font-bold text-white">OdontoClinic</h1>
-          <p className="mt-2 text-teal-200/80">
-            Gestão do seu consultório odontológico
-          </p>
-        </div>
+        <BrandLogo variant="hero" className="mb-8" />
 
-        <Card className="border-0 shadow-2xl shadow-black/20">
+        <Card className="border border-white/10 bg-white/95 shadow-2xl shadow-black/25 backdrop-blur-sm">
           <h2 className="mb-1 text-xl font-bold text-slate-900">Entrar</h2>
           <p className="mb-4 text-sm text-slate-500">
             {mode === "client"
