@@ -52,6 +52,7 @@ export function parseMoneyInput(value: string): number {
 }
 
 export function formatMoneyInput(value: string): string {
-  const amount = parseMoneyInput(value);
-  return formatCurrency(amount);
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "";
+  return formatCurrency(parseInt(digits, 10) / 100);
 }

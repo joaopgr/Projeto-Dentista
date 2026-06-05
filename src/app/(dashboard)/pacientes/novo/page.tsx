@@ -42,24 +42,28 @@ export default function NewPatientPage() {
       return;
     }
 
-    const { error: insertError } = await supabase.from("patients").insert({
-      user_id: user.id,
-      full_name: form.full_name.trim(),
-      email: form.email.trim() || null,
-      phone: form.phone.replace(/\D/g, ""),
-      cpf: form.cpf.replace(/\D/g, "") || null,
-      birth_date: form.birth_date || null,
-      address: form.address.trim() || null,
-      notes: form.notes.trim() || null,
-    });
+    const { data: patient, error: insertError } = await supabase
+      .from("patients")
+      .insert({
+        user_id: user.id,
+        full_name: form.full_name.trim(),
+        email: form.email.trim() || null,
+        phone: form.phone.replace(/\D/g, ""),
+        cpf: form.cpf.replace(/\D/g, "") || null,
+        birth_date: form.birth_date || null,
+        address: form.address.trim() || null,
+        notes: form.notes.trim() || null,
+      })
+      .select("id")
+      .single();
 
-    if (insertError) {
+    if (insertError || !patient) {
       setError("Erro ao cadastrar paciente. Tente novamente.");
       setLoading(false);
       return;
     }
 
-    router.push("/pacientes");
+    router.push(`/pacientes/${patient.id}`);
     router.refresh();
   }
 

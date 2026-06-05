@@ -1,35 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState, Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { createPaymentRecord, type PaymentMethod } from "@/lib/finance";
+import { parseMoneyInput } from "@/lib/utils";
 import {
-  PAYMENT_METHODS,
-  buildInstallments,
-  calculatePaymentAmounts,
-  type PaymentMethod,
-} from "@/lib/finance";
-import { formatCurrency, parseMoneyInput } from "@/lib/utils";
-import { Button, Card, Input, Select, Textarea } from "@/components/ui/form";
+  defaultPaymentFormState,
+  PaymentFormSection,
+  type PaymentFormState,
+} from "@/components/finance/payment-form-section";
+import { Button, Card, Select, Textarea } from "@/components/ui/form";
 import { PROCEDURE_TYPES, type Patient } from "@/types/database";
 
-export default function NewPaymentPage() {
+function NewPaymentForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preselected = searchParams.get("paciente") || "";
+
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({
-    patient_id: "",
-    description: "",
-    total_amount: "",
-    payment_method: "pix" as PaymentMethod,
-    fee_percent: "0",
-    installments_count: "1",
-    first_due_date: new Date().toISOString().slice(0, 10),
-    notes: "",
-  });
+  const [patientId, setPatientId] = useState(preselected);
+  const [description, setDescription] = useState("");
+  const [notes, setNotes] = useState("");
+  const [paymentForm, setPaymentForm] = useState<PaymentFormState>(defaultPaymentFormState);
 
   useEffect(() => {
     async function load() {
@@ -40,25 +37,13 @@ export default function NewPaymentPage() {
     load();
   }, []);
 
-  function update(field: string, value: string) {
-    setForm((prev) => {
-      const next = { ...prev, [field]: value };
-      if (field === "payment_method") {
-        const method = PAYMENT_METHODS.find((m) => m.value === value);
-        if (method) next.fee_percent = String(method.defaultFee);
-      }
-      return next;
-    });
-  }
+  useEffect(() => {
+    if (preselected) setPatientId(preselected);
+  }, [preselected]);
 
-  const preview = useMemo(() => {
-    const total = parseMoneyInput(form.total_amount);
-    const feePercent = parseFloat(form.fee_percent) || 0;
-    const { feeAmount, netAmount } = calculatePaymentAmounts(total, feePercent);
-    const count = parseInt(form.installments_count, 10) || 1;
-    const installmentValue = count > 0 ? netAmount / count : 0;
-    return { total, feeAmount, netAmount, count, installmentValue };
-  }, [form.total_amount, form.fee_percent, form.installments_count]);
+  function updatePayment(field: keyof PaymentFormState, value: string | boolean) {
+    setPaymentForm((prev) => ({ ...prev, [field]: value }));
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -76,69 +61,88 @@ export default function NewPaymentPage() {
       return;
     }
 
-    const totalAmount = parseMoneyInput(form.total_amount);
-    if (totalAmount <= 0) {
-      setError("Informe um valor válido.");
+    const result = await createPaymentRecord(supabase, {
+      userId: user.id,
+      patientId,
+      description: description.trim(),
+      procedureAmount: parseMoneyInput(paymentForm.total_amount),
+      paymentMethod: paymentForm.payment_method as PaymentMethod,
+      feePercent: parseFloat(paymentForm.fee_percent) || 0,
+      passFeeToClient: paymentForm.pass_fee_to_client,
+      installmentsCount: parseInt(paymentForm.installments_count, 10) || 1,
+      firstDueDate: paymentForm.first_due_date,
+      notes: notes || paymentForm.notes,
+    });
+
+    if ("error" in result) {
+      setError(result.error);
       setLoading(false);
       return;
     }
 
-    const feePercent = parseFloat(form.fee_percent) || 0;
-    const { feeAmount, netAmount } = calculatePaymentAmounts(totalAmount, feePercent);
-    const installmentsCount = parseInt(form.installments_count, 10) || 1;
-    const installments = buildInstallments(
-      netAmount,
-      installmentsCount,
-      form.first_due_date
-    );
-
-    const { data: payment, error: paymentError } = await supabase
-      .from("payments")
-      .insert({
-        user_id: user.id,
-        patient_id: form.patient_id,
-        description: form.description.trim(),
-        total_amount: totalAmount,
-        payment_method: form.payment_method,
-        fee_percent: feePercent,
-        fee_amount: feeAmount,
-        net_amount: netAmount,
-        installments_count: installmentsCount,
-        notes: form.notes.trim() || null,
-      })
-      .select("id")
-      .single();
-
-    if (paymentError || !payment) {
-      setError(
-        paymentError?.message.includes("relation")
-          ? "Execute a migração financeira no Supabase (002_finance.sql)."
-          : "Erro ao registrar pagamento."
-      );
-      setLoading(false);
-      return;
-    }
-
-    const { error: installmentsError } = await supabase
-      .from("payment_installments")
-      .insert(
-        installments.map((inst) => ({
-          user_id: user.id,
-          payment_id: payment.id,
-          ...inst,
-        }))
-      );
-
-    if (installmentsError) {
-      setError("Erro ao criar parcelas.");
-      setLoading(false);
-      return;
-    }
-
-    router.push(`/financeiro/${payment.id}`);
+    router.push(`/financeiro/${result.paymentId}`);
     router.refresh();
   }
 
+  return (
+    <Card>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Select
+          label="Paciente *"
+          required
+          value={patientId}
+          onChange={(e) => setPatientId(e.target.value)}
+        >
+          <option value="">Selecione</option>
+          {patients.map((p) => (
+            <option key={p.id} value={p.id}>{p.full_name}</option>
+          ))}
+        </Select>
+
+        <Select
+          label="Procedimento *"
+          required
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        >
+          <option value="">Selecione</option>
+          {PROCEDURE_TYPES.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </Select>
+
+        <PaymentFormSection
+          form={paymentForm}
+          onChange={updatePayment}
+          showNotes={false}
+        />
+
+        <Textarea
+          label="Observações"
+          rows={2}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+
+        {error && (
+          <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          <Button type="submit" loading={loading}>Registrar</Button>
+          <Link
+            href="/financeiro"
+            className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Cancelar
+          </Link>
+        </div>
+      </form>
+    </Card>
+  );
+}
+
+export default function NewPaymentPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
@@ -151,120 +155,9 @@ export default function NewPaymentPage() {
         </div>
       </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Select
-            label="Paciente *"
-            required
-            value={form.patient_id}
-            onChange={(e) => update("patient_id", e.target.value)}
-          >
-            <option value="">Selecione</option>
-            {patients.map((p) => (
-              <option key={p.id} value={p.id}>{p.full_name}</option>
-            ))}
-          </Select>
-
-          <Select
-            label="Procedimento *"
-            required
-            value={form.description}
-            onChange={(e) => update("description", e.target.value)}
-          >
-            <option value="">Selecione</option>
-            {PROCEDURE_TYPES.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </Select>
-
-          <Input
-            label="Valor do procedimento *"
-            required
-            value={form.total_amount}
-            onChange={(e) => update("total_amount", e.target.value)}
-            placeholder="R$ 0,00"
-            inputMode="numeric"
-          />
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Select
-              label="Forma de pagamento *"
-              value={form.payment_method}
-              onChange={(e) => update("payment_method", e.target.value)}
-            >
-              {PAYMENT_METHODS.map((m) => (
-                <option key={m.value} value={m.value}>{m.label}</option>
-              ))}
-            </Select>
-            <Input
-              label="Taxa (%)"
-              type="number"
-              min="0"
-              step="0.01"
-              value={form.fee_percent}
-              onChange={(e) => update("fee_percent", e.target.value)}
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Select
-              label="Parcelas"
-              value={form.installments_count}
-              onChange={(e) => update("installments_count", e.target.value)}
-            >
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={String(n)}>
-                  {n}x {n === 1 ? "(à vista)" : ""}
-                </option>
-              ))}
-            </Select>
-            <Input
-              label="Vencimento da 1ª parcela *"
-              type="date"
-              required
-              value={form.first_due_date}
-              onChange={(e) => update("first_due_date", e.target.value)}
-            />
-          </div>
-
-          <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
-            <p className="font-medium text-slate-900">Resumo</p>
-            <div className="mt-2 space-y-1">
-              <p>Valor bruto: {formatCurrency(preview.total)}</p>
-              <p>Taxa ({form.fee_percent}%): − {formatCurrency(preview.feeAmount)}</p>
-              <p className="font-semibold text-teal-700">
-                Valor líquido: {formatCurrency(preview.netAmount)}
-              </p>
-              {preview.count > 1 && (
-                <p>
-                  {preview.count}x de {formatCurrency(preview.installmentValue)} (aprox.)
-                </p>
-              )}
-            </div>
-          </div>
-
-          <Textarea
-            label="Observações"
-            rows={2}
-            value={form.notes}
-            onChange={(e) => update("notes", e.target.value)}
-          />
-
-          {error && (
-            <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-          )}
-
-          <div className="flex gap-3 pt-2">
-            <Button type="submit" loading={loading}>Registrar</Button>
-            <Link
-              href="/financeiro"
-              className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Cancelar
-            </Link>
-          </div>
-        </form>
-      </Card>
+      <Suspense fallback={<Card><p className="text-slate-500">Carregando...</p></Card>}>
+        <NewPaymentForm />
+      </Suspense>
     </div>
   );
 }

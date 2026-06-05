@@ -6,7 +6,13 @@ import { FormEvent, useEffect, useState, Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { checkAppointmentConflict, formatConflictMessage } from "@/lib/appointments";
-import { combineDateAndTime } from "@/lib/utils";
+import { createPaymentRecord, type PaymentMethod } from "@/lib/finance";
+import { combineDateAndTime, parseMoneyInput } from "@/lib/utils";
+import {
+  defaultPaymentFormState,
+  PaymentFormSection,
+  type PaymentFormState,
+} from "@/components/finance/payment-form-section";
 import { Button, Card, Input, Select, Textarea } from "@/components/ui/form";
 import { APPOINTMENT_STATUS_LABELS, DURATION_OPTIONS, PROCEDURE_TYPES } from "@/types/database";
 import type { Patient } from "@/types/database";
@@ -19,6 +25,8 @@ function NewAppointmentForm() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [registerPayment, setRegisterPayment] = useState(false);
+  const [paymentForm, setPaymentForm] = useState<PaymentFormState>(defaultPaymentFormState);
   const [form, setForm] = useState({
     patient_id: preselected,
     scheduled_date: "",
@@ -52,6 +60,10 @@ function NewAppointmentForm() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function updatePayment(field: keyof PaymentFormState, value: string | boolean) {
+    setPaymentForm((prev) => ({ ...prev, [field]: value }));
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -72,6 +84,15 @@ function NewAppointmentForm() {
       setError("Informe a data e o horário.");
       setLoading(false);
       return;
+    }
+
+    if (registerPayment) {
+      const amount = parseMoneyInput(paymentForm.total_amount);
+      if (amount <= 0) {
+        setError("Informe o valor do procedimento para registrar o pagamento.");
+        setLoading(false);
+        return;
+      }
     }
 
     const duration = parseInt(form.duration_minutes, 10);
@@ -97,23 +118,49 @@ function NewAppointmentForm() {
       return;
     }
 
-    const { error: insertError } = await supabase.from("appointments").insert({
-      user_id: user.id,
-      patient_id: form.patient_id,
-      scheduled_at: combineDateAndTime(form.scheduled_date, form.scheduled_time),
-      duration_minutes: duration,
-      procedure_type: form.procedure_type,
-      status: form.status,
-      notes: form.notes.trim() || null,
-    });
+    const { data: appointment, error: insertError } = await supabase
+      .from("appointments")
+      .insert({
+        user_id: user.id,
+        patient_id: form.patient_id,
+        scheduled_at: combineDateAndTime(form.scheduled_date, form.scheduled_time),
+        duration_minutes: duration,
+        procedure_type: form.procedure_type,
+        status: form.status,
+        notes: form.notes.trim() || null,
+      })
+      .select("id")
+      .single();
 
-    if (insertError) {
+    if (insertError || !appointment) {
       setError("Erro ao criar agendamento.");
       setLoading(false);
       return;
     }
 
-    router.push("/agenda");
+    if (registerPayment) {
+      const result = await createPaymentRecord(supabase, {
+        userId: user.id,
+        patientId: form.patient_id,
+        appointmentId: appointment.id,
+        description: form.procedure_type,
+        procedureAmount: parseMoneyInput(paymentForm.total_amount),
+        paymentMethod: paymentForm.payment_method as PaymentMethod,
+        feePercent: parseFloat(paymentForm.fee_percent) || 0,
+        passFeeToClient: paymentForm.pass_fee_to_client,
+        installmentsCount: parseInt(paymentForm.installments_count, 10) || 1,
+        firstDueDate: paymentForm.first_due_date,
+        notes: paymentForm.notes,
+      });
+
+      if ("error" in result) {
+        setError(`Agendamento criado, mas ${result.error.toLowerCase()}`);
+        setLoading(false);
+        return;
+      }
+    }
+
+    router.push(`/agenda/${appointment.id}`);
     router.refresh();
   }
 
@@ -209,6 +256,27 @@ function NewAppointmentForm() {
               onChange={(e) => update("notes", e.target.value)}
               placeholder="Informações adicionais sobre a consulta"
             />
+
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3">
+              <input
+                type="checkbox"
+                checked={registerPayment}
+                onChange={(e) => setRegisterPayment(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+              />
+              <span className="text-sm text-slate-700">
+                <span className="font-medium text-slate-900">
+                  Registrar pagamento agora
+                </span>
+                <span className="mt-0.5 block text-slate-500">
+                  Informe valor e forma de pagamento junto com o agendamento.
+                </span>
+              </span>
+            </label>
+
+            {registerPayment && (
+              <PaymentFormSection form={paymentForm} onChange={updatePayment} />
+            )}
 
             {error && (
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">

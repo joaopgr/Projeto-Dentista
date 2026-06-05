@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { formatCPF, formatPhone } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { PatientSearch } from "@/components/patients/patient-search";
+import { PatientTableRows } from "@/components/patients/patient-table-rows";
 
 export default async function PatientsPage({
   searchParams,
@@ -81,30 +81,7 @@ export default async function PatientsPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {patients.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-900">
-                      {patient.full_name}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {formatPhone(patient.phone)}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 hidden sm:table-cell">
-                      {patient.email || "—"}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 hidden md:table-cell">
-                      {patient.cpf ? formatCPF(patient.cpf) : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/pacientes/${patient.id}`}
-                        className="text-sm font-medium text-teal-600 hover:underline"
-                      >
-                        Ver / Editar
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                <PatientTableRows patients={patients} />
               </tbody>
             </table>
           </div>
