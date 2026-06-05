@@ -66,7 +66,7 @@ export default function NewMaterialPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/estoque"
-          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+          className="icon-btn"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -146,7 +146,7 @@ export default function NewMaterialPage() {
             </Button>
             <Link
               href="/estoque"
-              className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="btn-ghost"
             >
               Cancelar
             </Link>

@@ -130,10 +130,7 @@ function NewPaymentForm() {
 
         <div className="flex gap-3 pt-2">
           <Button type="submit" loading={loading}>Registrar</Button>
-          <Link
-            href="/financeiro"
-            className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
+          <Link href="/financeiro" className="btn-ghost">
             Cancelar
           </Link>
         </div>
@@ -146,12 +143,12 @@ export default function NewPaymentPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/financeiro" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+        <Link href="/financeiro" className="icon-btn">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Novo lançamento</h1>
-          <p className="text-sm text-slate-600">Registre procedimento e forma de pagamento</p>
+          <h1 className="page-title">Novo lançamento</h1>
+          <p className="page-subtitle">Registre procedimento e forma de pagamento</p>
         </div>
       </div>
 

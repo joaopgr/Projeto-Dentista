@@ -97,7 +97,7 @@ export function PaymentFormSection({
         />
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3">
+      <label className="flex cursor-pointer items-start gap-3 rounded-[1.35rem] border border-slate-200/60 bg-slate-50/40 p-4 transition hover:border-teal-200 hover:bg-teal-50/30">
         <input
           type="checkbox"
           checked={form.pass_fee_to_client}

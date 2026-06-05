@@ -66,7 +66,7 @@ export function PaymentDetail({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/financeiro" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+        <Link href="/financeiro" className="icon-btn">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
@@ -117,7 +117,7 @@ export function PaymentDetail({
           {installments.map((inst) => (
             <li
               key={inst.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 p-3"
+              className="list-row"
             >
               <div>
                 <p className="font-medium text-slate-900">
@@ -149,7 +149,7 @@ export function PaymentDetail({
                     type="button"
                     onClick={() => markPaid(inst)}
                     disabled={loadingId === inst.id}
-                    className="inline-flex items-center gap-1 rounded-lg border border-teal-300 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-700 hover:bg-teal-100 disabled:opacity-60"
+                    className="btn-soft px-3 py-1.5 text-xs disabled:opacity-60"
                   >
                     <Check className="h-3.5 w-3.5" />
                     Receber antes

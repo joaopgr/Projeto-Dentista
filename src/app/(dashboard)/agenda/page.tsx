@@ -92,16 +92,13 @@ async function TodayView({ dia }: { dia?: string }) {
           <ul className="space-y-3">
             {list.map((apt) => (
               <li key={apt.id}>
-                <Link
-                  href={`/agenda/${apt.id}`}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 p-4 transition hover:border-teal-200 hover:bg-teal-50/50"
-                >
+                <Link href={`/agenda/${apt.id}`} className="list-row">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 flex-col items-center justify-center rounded-xl bg-teal-100 text-teal-800">
-                      <span className="text-lg font-bold leading-none">
+                    <div className="time-badge">
+                      <span className="text-sm font-bold leading-none">
                         {format(new Date(apt.scheduled_at), "HH:mm")}
                       </span>
-                      <span className="mt-0.5 text-[10px] font-medium">
+                      <span className="mt-0.5 text-[10px] font-medium text-white/80">
                         {apt.duration_minutes}min
                       </span>
                     </div>
@@ -173,7 +170,7 @@ async function WeekView({ semana }: { semana?: string }) {
           return (
             <Card
               key={dayKey}
-              className={today ? "ring-2 ring-teal-200" : dayAppointments.length === 0 ? "opacity-80" : ""}
+              className={today ? "ring-2 ring-teal-200/60 ring-offset-2" : dayAppointments.length === 0 ? "opacity-85" : ""}
             >
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="font-semibold capitalize text-slate-900">
@@ -197,7 +194,7 @@ async function WeekView({ semana }: { semana?: string }) {
                     <li key={apt.id}>
                       <Link
                         href={`/agenda/${apt.id}`}
-                        className="block rounded-lg border border-slate-100 p-3 transition hover:border-teal-200 hover:bg-teal-50/50"
+                        className="block rounded-2xl border border-transparent bg-slate-50/50 p-3.5 transition-all duration-200 hover:border-teal-100 hover:bg-teal-50/50 hover:shadow-sm"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
@@ -236,8 +233,8 @@ function AgendaHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
-        <p className="capitalize text-slate-600">
+        <h1 className="page-title">{title}</h1>
+        <p className="page-subtitle capitalize">
           {subtitle}
           {isToday && (
             <span className="ml-2 rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
@@ -248,7 +245,7 @@ function AgendaHeader({
       </div>
       <Link
         href="/agenda/novo"
-        className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-700"
+        className="btn-primary"
       >
         <Plus className="h-4 w-4" />
         Novo agendamento
@@ -259,24 +256,16 @@ function AgendaHeader({
 
 function ViewTabs({ active }: { active: "hoje" | "semana" }) {
   return (
-    <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+    <div className="pill-tabs">
       <Link
         href="/agenda?view=hoje"
-        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
-          active === "hoje"
-            ? "bg-teal-600 text-white"
-            : "text-slate-600 hover:bg-slate-50"
-        }`}
+        className={`pill-tab ${active === "hoje" ? "pill-tab-active" : ""}`}
       >
         Hoje
       </Link>
       <Link
         href="/agenda?view=semana"
-        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
-          active === "semana"
-            ? "bg-teal-600 text-white"
-            : "text-slate-600 hover:bg-slate-50"
-        }`}
+        className={`pill-tab ${active === "semana" ? "pill-tab-active" : ""}`}
       >
         Semana
       </Link>
@@ -299,20 +288,20 @@ function DayNavigation({
     <div className="flex items-center justify-between">
       <Link
         href={prevHref}
-        className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        className="btn-ghost gap-1 px-3 py-2"
       >
         <ChevronLeft className="h-4 w-4" />
         Anterior
       </Link>
       <Link
         href={currentHref}
-        className="text-sm font-medium text-teal-600 hover:underline"
+        className="rounded-full bg-teal-50 px-4 py-1.5 text-sm font-medium text-teal-700 transition hover:bg-teal-100"
       >
         {currentLabel}
       </Link>
       <Link
         href={nextHref}
-        className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        className="btn-ghost gap-1 px-3 py-2"
       >
         Próximo
         <ChevronRight className="h-4 w-4" />

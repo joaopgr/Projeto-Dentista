@@ -23,7 +23,7 @@ export function MaterialSearch({ defaultValue }: { defaultValue?: string }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Buscar material ou categoria..."
-        className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+        className="w-full rounded-full border border-slate-200/70 bg-white/80 py-2.5 pl-10 pr-4 text-sm shadow-sm transition focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
       />
     </form>
   );

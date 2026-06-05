@@ -32,22 +32,19 @@ export default async function EstoquePage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Estoque</h1>
-          <p className="text-slate-600">
+          <h1 className="page-title">Estoque</h1>
+          <p className="page-subtitle">
             {list.length} material(is) · {lowStockItems.length} com estoque baixo
           </p>
         </div>
-        <Link
-          href="/estoque/novo"
-          className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-700"
-        >
+        <Link href="/estoque/novo" className="btn-primary">
           <Plus className="h-4 w-4" />
           Novo material
         </Link>
       </div>
 
       {lowStockItems.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="alert-banner">
           <div className="flex items-center gap-2 text-slate-700">
             <AlertTriangle className="h-5 w-5" />
             <p className="font-semibold">Materiais com estoque baixo</p>
@@ -84,7 +81,7 @@ export default async function EstoquePage({
           )}
         </Card>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="data-table">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-200 bg-slate-50">

@@ -55,21 +55,18 @@ export default async function FinanceiroPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Financeiro</h1>
-          <p className="capitalize text-slate-600">
+          <h1 className="page-title">Financeiro</h1>
+          <p className="page-subtitle capitalize">
             {format(now, "MMMM yyyy", { locale: ptBR })}
           </p>
         </div>
-        <Link
-          href="/financeiro/novo"
-          className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700"
-        >
+        <Link href="/financeiro/novo" className="btn-primary">
           <Plus className="h-4 w-4" />
           Novo lançamento
         </Link>
       </div>
 
-      <div className="rounded-xl border border-teal-200/80 bg-teal-50/50 px-4 py-3 text-sm text-teal-800">
+      <div className="info-banner">
         Parcelas com vencimento no dia ou antes de hoje são contabilizadas
         automaticamente em <strong>Recebidos</strong>. Ex.: 10x de R$ 100 — ao
         chegar 01/07, R$ 100 sai de &quot;a receber&quot; e entra em recebidos.
@@ -108,7 +105,7 @@ export default async function FinanceiroPage() {
                 ? normalizeRelation(payment.patients) as { full_name?: string } | null
                 : null;
               return (
-                <li key={inst.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                <li key={inst.id} className="list-row">
                   <div>
                     <p className="font-medium text-slate-900">
                       {payment?.description ?? "Procedimento"} — {patient?.full_name}
@@ -216,8 +213,8 @@ function FinanceStat({
   };
 
   return (
-    <div className={`rounded-2xl bg-gradient-to-br ${styles[variant]} p-5 text-white shadow-lg`}>
-      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white/20">
+    <div className={`rounded-[1.75rem] bg-gradient-to-br ${styles[variant]} p-6 text-white shadow-[0_12px_40px_rgba(15,23,42,0.15)]`}>
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
         {icon}
       </div>
       <p className="text-xs text-white/80">{label}</p>

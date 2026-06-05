@@ -9,7 +9,7 @@ import { ClientSignOutButton } from "@/components/portal/client-sign-out-button"
 
 function PortalLoadError() {
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+    <div className="alert-banner p-8 text-center">
       <p className="font-medium text-amber-900">
         Não foi possível carregar seus dados.
       </p>

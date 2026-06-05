@@ -78,7 +78,7 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md">
         <BrandLogo variant="hero" className="mb-8" />
 
-        <Card className="border border-white/10 bg-white/95 shadow-2xl shadow-black/25 backdrop-blur-sm">
+        <Card className="rounded-[2rem] border border-white/20 bg-white/92 p-8 shadow-2xl shadow-black/20 backdrop-blur-md">
           <h2 className="mb-1 text-xl font-bold text-slate-900">Entrar</h2>
           <p className="mb-4 text-sm text-slate-500">
             {mode === "client"
@@ -86,7 +86,7 @@ export default function LoginPage() {
               : "Acesso para dentistas e funcionários"}
           </p>
 
-          <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+          <div className="pill-tabs mb-6 grid w-full grid-cols-2">
             <button
               type="button"
               onClick={() => {
@@ -94,10 +94,8 @@ export default function LoginPage() {
                 setError("");
               }}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                mode === "client"
-                  ? "bg-white text-teal-700 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                "pill-tab flex items-center justify-center gap-2",
+                mode === "client" && "pill-tab-active"
               )}
             >
               <User className="h-4 w-4" />
@@ -110,10 +108,8 @@ export default function LoginPage() {
                 setError("");
               }}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                mode === "staff"
-                  ? "bg-white text-teal-700 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                "pill-tab flex items-center justify-center gap-2",
+                mode === "staff" && "pill-tab-active"
               )}
             >
               <Users className="h-4 w-4" />

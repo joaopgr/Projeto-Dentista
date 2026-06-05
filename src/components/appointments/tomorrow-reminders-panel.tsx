@@ -26,7 +26,7 @@ export function TomorrowRemindersPanel({
   const pending = appointments.filter((a) => !a.reminder_sent_at);
 
   return (
-    <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
+    <div className="rounded-[1.75rem] border border-amber-200/50 bg-gradient-to-br from-amber-50/90 via-white to-white p-6 shadow-[0_8px_30px_rgba(245,158,11,0.08)]">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-semibold text-slate-900">Lembretes para amanhã</h2>
@@ -36,7 +36,7 @@ export function TomorrowRemindersPanel({
           </p>
         </div>
         {pending.length > 0 && (
-          <span className="rounded-full bg-amber-200 px-3 py-1 text-xs font-semibold text-amber-900">
+          <span className="rounded-full bg-amber-100 px-3.5 py-1.5 text-xs font-semibold text-amber-900 shadow-sm">
             {pending.length} pendente(s)
           </span>
         )}
@@ -86,8 +86,10 @@ function ReminderRow({
 
   return (
     <li
-      className={`rounded-xl border p-4 ${
-        sent ? "border-teal-200 bg-teal-50/40" : "border-slate-200 bg-white"
+      className={`rounded-2xl border p-4 transition-all duration-200 ${
+        sent
+          ? "border-teal-200/60 bg-teal-50/50 shadow-sm"
+          : "border-slate-200/50 bg-white/80 shadow-sm hover:shadow-md"
       }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -110,7 +112,7 @@ function ReminderRow({
           <button
             type="button"
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="btn-ghost px-3 py-2"
           >
             <Copy className="h-4 w-4" />
             {copied ? "Copiado!" : "Copiar"}
@@ -122,7 +124,7 @@ function ReminderRow({
             onClick={() => {
               if (!sent) void handleMarkSent();
             }}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-2 text-sm font-medium text-white hover:bg-[#20bd5a]"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] px-4 py-2 text-sm font-medium text-white shadow-md shadow-[#25D366]/30 transition hover:bg-[#20bd5a] hover:shadow-lg"
           >
             <MessageCircle className="h-4 w-4" />
             WhatsApp
@@ -132,7 +134,7 @@ function ReminderRow({
               type="button"
               onClick={handleMarkSent}
               disabled={marking}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-teal-300 bg-teal-50 px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-100 disabled:opacity-60"
+              className="btn-soft px-3 py-2 disabled:opacity-60"
             >
               <Check className="h-4 w-4" />
               {marking ? "..." : "Marcar enviado"}

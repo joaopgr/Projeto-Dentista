@@ -26,26 +26,28 @@ export default async function DashboardLayout({
 
   return (
     <div className="app-shell min-h-screen">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-teal-900/10 bg-gradient-to-b from-teal-950 via-teal-900 to-teal-950 lg:flex">
-        <div className="border-b border-white/10 p-5">
+      <aside className="fixed inset-y-3 left-3 z-30 hidden w-[15.5rem] flex-col overflow-hidden rounded-[2rem] bg-gradient-to-b from-teal-950 via-teal-900 to-slate-950 shadow-2xl shadow-teal-950/30 lg:flex">
+        <div className="border-b border-white/10 px-5 py-6">
           <BrandLogo variant="sidebar" />
         </div>
 
         <SidebarNav />
 
         <div className="border-t border-white/10 p-4">
-          <div className="rounded-xl bg-white/10 p-3 ring-1 ring-white/10">
+          <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/10 backdrop-blur-sm">
             <p className="truncate text-sm font-medium text-white">
               {profile?.full_name || user.email}
             </p>
             <p className="truncate text-xs text-teal-200/70">{user.email}</p>
-            <SignOutButton light />
+            <div className="mt-3">
+              <SignOutButton light />
+            </div>
           </div>
         </div>
       </aside>
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-md lg:hidden">
+      <div className="lg:pl-[17rem]">
+        <header className="sticky top-0 z-20 border-b border-slate-200/50 bg-white/70 backdrop-blur-xl lg:hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <BrandLogo variant="header" />
             <SignOutButton compact />
@@ -53,7 +55,7 @@ export default async function DashboardLayout({
           <MobileNav />
         </header>
 
-        <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="mx-auto max-w-6xl p-4 sm:p-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>
   );

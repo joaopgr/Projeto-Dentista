@@ -15,15 +15,15 @@ function BrandMark({
   light?: boolean;
 }) {
   const sizes = {
-    sm: "h-8 w-8 rounded-lg text-sm",
-    md: "h-10 w-10 rounded-xl text-base",
-    lg: "h-16 w-16 rounded-2xl text-2xl",
+    sm: "h-9 w-9 rounded-2xl text-sm",
+    md: "h-11 w-11 rounded-2xl text-base",
+    lg: "h-[4.5rem] w-[4.5rem] rounded-[1.75rem] text-2xl",
   };
 
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center font-bold tracking-tight shadow-sm",
+        "flex shrink-0 items-center justify-center font-bold tracking-tight shadow-lg",
         sizes[size],
         light
           ? "bg-white/15 text-white ring-1 ring-white/25 backdrop-blur-sm"

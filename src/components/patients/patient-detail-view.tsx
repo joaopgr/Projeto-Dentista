@@ -42,29 +42,27 @@ export function PatientDetailView({
       <div className="flex flex-wrap gap-2">
         <Link
           href={`/agenda/novo?paciente=${patient.id}`}
-          className="inline-flex items-center rounded-lg border border-teal-300 bg-teal-50 px-3 py-2 text-sm font-medium text-teal-700 hover:bg-teal-100"
+          className="btn-soft"
         >
           Agendar consulta
         </Link>
         <Link
           href={`/financeiro/novo?paciente=${patient.id}`}
-          className="inline-flex items-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="btn-ghost"
         >
           Novo lançamento
         </Link>
       </div>
 
-      <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1">
+      <div className="pill-tabs w-full">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setTab(id)}
             className={cn(
-              "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition",
-              tab === id
-                ? "bg-white text-teal-700 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+              "pill-tab flex flex-1 items-center justify-center gap-2",
+              tab === id && "pill-tab-active"
             )}
           >
             <Icon className="h-4 w-4" />
@@ -76,7 +74,7 @@ export function PatientDetailView({
       {tab === "dados" && <PatientForm patient={patient} />}
 
       {tab === "atendimentos" && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/90 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
           {!appointments.length ? (
             <div className="px-4 py-10 text-center text-sm text-slate-500">
               Nenhum atendimento registrado.{" "}
@@ -118,7 +116,7 @@ export function PatientDetailView({
       )}
 
       {tab === "pagamentos" && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/90 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
           {!payments.length ? (
             <div className="px-4 py-10 text-center text-sm text-slate-500">
               Nenhum pagamento registrado.{" "}

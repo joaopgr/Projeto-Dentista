@@ -42,7 +42,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl bg-gradient-to-r from-teal-700 via-teal-600 to-teal-700 p-6 text-white shadow-lg shadow-teal-700/25 ring-1 ring-white/10">
+      <div className="rounded-[2rem] bg-gradient-to-br from-teal-700 via-teal-600 to-teal-800 p-7 text-white shadow-xl shadow-teal-800/25">
         <p className="text-sm font-medium text-teal-100">{BRAND.name}</p>
         <h1 className="mt-1 text-2xl font-bold">Painel administrativo</h1>
         <p className="mt-1 text-sm text-teal-100/90">{BRAND.tagline}</p>
@@ -77,8 +77,8 @@ export default async function DashboardPage() {
       </div>
 
       {lowStockCount > 0 && (
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-200">
+        <div className="flex items-center gap-3 rounded-[1.5rem] border border-slate-200/60 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100">
             <AlertTriangle className="h-5 w-5 text-slate-600" />
           </div>
           <div className="flex-1">
@@ -121,13 +121,13 @@ export default async function DashboardPage() {
                 <li key={apt.id}>
                   <Link
                     href={`/agenda/${apt.id}`}
-                    className="flex items-center gap-4 rounded-xl border border-slate-100 p-4 transition hover:border-teal-200 hover:bg-teal-50/30"
+                    className="list-row !flex-nowrap items-center"
                   >
-                    <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-teal-100 text-teal-800">
+                    <div className="time-badge">
                       <span className="text-base font-bold leading-none">
                         {format(new Date(apt.scheduled_at), "HH:mm")}
                       </span>
-                      <span className="mt-0.5 text-[10px] font-medium">
+                      <span className="mt-0.5 text-[10px] font-medium text-white/80">
                         {apt.duration_minutes}min
                       </span>
                     </div>
@@ -177,9 +177,9 @@ function StatCard({
   return (
     <Link href={href} className="group">
       <div
-        className={`rounded-2xl bg-gradient-to-br ${colors[color]} p-5 text-white shadow-lg transition group-hover:scale-[1.02] group-hover:shadow-xl ${alert ? "ring-2 ring-slate-300 ring-offset-2" : ""}`}
+        className={`rounded-[1.75rem] bg-gradient-to-br ${colors[color]} p-6 text-white shadow-xl transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-2xl ${alert ? "ring-2 ring-slate-300/80 ring-offset-2" : ""}`}
       >
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
           {icon}
         </div>
         <p className="text-3xl font-bold">{value}</p>

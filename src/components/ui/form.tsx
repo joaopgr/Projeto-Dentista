@@ -7,7 +7,7 @@ import { ButtonHTMLAttributes, InputHTMLAttributes, forwardRef } from "react";
 export { Card, PageHeader } from "@/components/ui/card";
 
 const fieldClass =
-  "w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20";
+  "w-full rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-3 text-sm text-slate-900 shadow-sm shadow-slate-200/30 placeholder:text-slate-400 transition-all duration-200 focus:border-teal-400 focus:bg-white focus:shadow-md focus:shadow-teal-500/10 focus:ring-4 focus:ring-teal-500/10";
 
 export const Input = forwardRef<
   HTMLInputElement,
@@ -101,7 +101,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60",
+        "btn-primary disabled:cursor-not-allowed disabled:opacity-60",
         className
       )}
       disabled={loading || props.disabled}

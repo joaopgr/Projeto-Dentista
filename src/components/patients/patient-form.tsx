@@ -129,7 +129,7 @@ export function PatientForm({ patient }: { patient: Patient }) {
           </Button>
           <Link
             href={`/agenda/novo?paciente=${patient.id}`}
-            className="inline-flex items-center rounded-lg border border-teal-300 bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-700 hover:bg-teal-100"
+            className="btn-soft"
           >
             Agendar consulta
           </Link>
@@ -137,7 +137,7 @@ export function PatientForm({ patient }: { patient: Patient }) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+            className="btn-danger"
           >
             <Trash2 className="h-4 w-4" />
             Excluir
@@ -153,13 +153,13 @@ export function PatientPageHeader({ name }: { name: string }) {
     <div className="flex items-center gap-3">
       <Link
         href="/pacientes"
-        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+        className="icon-btn"
       >
         <ArrowLeft className="h-5 w-5" />
       </Link>
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{name}</h1>
-        <p className="text-sm text-slate-600">Ficha do paciente</p>
+        <h1 className="page-title">{name}</h1>
+        <p className="page-subtitle">Ficha do paciente</p>
       </div>
     </div>
   );

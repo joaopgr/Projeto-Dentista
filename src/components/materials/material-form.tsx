@@ -103,7 +103,7 @@ export function MaterialForm({ material }: { material: Material }) {
         </div>
       )}
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <div className="mb-6 rounded-[1.35rem] border border-slate-200/60 bg-slate-50/50 p-4">
         <p className="mb-2 text-sm font-medium text-slate-700">Ajuste rápido</p>
         <div className="flex flex-wrap items-center gap-2">
           <Input
@@ -119,7 +119,7 @@ export function MaterialForm({ material }: { material: Material }) {
             type="button"
             onClick={() => adjustStock(1)}
             disabled={adjusting}
-            className="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60"
           >
             <Plus className="h-4 w-4" />
             Entrada
@@ -128,7 +128,7 @@ export function MaterialForm({ material }: { material: Material }) {
             type="button"
             onClick={() => adjustStock(-1)}
             disabled={adjusting}
-            className="inline-flex items-center gap-1 rounded-lg bg-slate-600 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-full bg-slate-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700 disabled:opacity-60"
           >
             <Minus className="h-4 w-4" />
             Saída
@@ -208,7 +208,7 @@ export function MaterialForm({ material }: { material: Material }) {
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+            className="btn-danger"
           >
             <Trash2 className="h-4 w-4" />
             Excluir
@@ -224,7 +224,7 @@ export function MaterialPageHeader({ name }: { name: string }) {
     <div className="flex items-center gap-3">
       <Link
         href="/estoque"
-        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+        className="icon-btn"
       >
         <ArrowLeft className="h-5 w-5" />
       </Link>

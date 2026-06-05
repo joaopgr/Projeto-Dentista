@@ -22,9 +22,9 @@ export default async function ConfirmAppointmentPage({
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 via-white to-slate-50 px-4 py-10">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
+      <div className="w-full max-w-md rounded-[2rem] border border-white/60 bg-white/95 p-8 shadow-2xl shadow-slate-900/10 backdrop-blur-sm">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-teal-800 text-lg font-bold text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 text-lg font-bold text-white shadow-md shadow-teal-600/25">
             {BRAND.initials}
           </div>
           <div>

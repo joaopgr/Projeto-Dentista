@@ -30,14 +30,14 @@ export default async function PatientsPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pacientes</h1>
-          <p className="text-slate-600">
+          <h1 className="page-title">Pacientes</h1>
+          <p className="page-subtitle">
             {patients?.length ?? 0} paciente(s) cadastrado(s)
           </p>
         </div>
         <Link
           href="/pacientes/novo"
-          className="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-700"
+          className="btn-primary"
         >
           <Plus className="h-4 w-4" />
           Novo paciente
@@ -68,7 +68,7 @@ export default async function PatientsPage({
           )}
         </Card>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="data-table">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-200 bg-slate-50">

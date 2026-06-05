@@ -26,7 +26,7 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
   const [y, m, d] = date.split("-");
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl border border-slate-200/50 bg-white/90 p-4 shadow-sm transition hover:shadow-md">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="font-medium text-slate-900">
@@ -59,7 +59,7 @@ export function ClientPortalView({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-teal-200/80 bg-gradient-to-br from-teal-50 to-white p-5 shadow-sm">
+      <div className="rounded-[1.75rem] border border-teal-200/40 bg-gradient-to-br from-teal-50/90 via-white to-white p-6 shadow-[0_8px_30px_rgba(13,148,136,0.08)]">
         <p className="text-sm font-medium text-teal-800">
           Bem-vindo(a), <span className="font-semibold">{patient.full_name}</span>!
         </p>
@@ -69,17 +69,15 @@ export function ClientPortalView({
         </p>
       </div>
 
-      <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1">
+      <div className="pill-tabs w-full">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setTab(id)}
             className={cn(
-              "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition",
-              tab === id
-                ? "bg-white text-teal-700 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+              "pill-tab flex flex-1 items-center justify-center gap-2",
+              tab === id && "pill-tab-active"
             )}
           >
             <Icon className="h-4 w-4" />
@@ -89,7 +87,7 @@ export function ClientPortalView({
       </div>
 
       {tab === "dados" && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-[1.75rem] border border-white/60 bg-white/90 p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
           <dl className="grid gap-4 sm:grid-cols-2">
             <div>
               <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -176,7 +174,7 @@ export function ClientPortalView({
               return (
                 <div
                   key={payment.id}
-                  className="rounded-xl border border-slate-200 bg-white p-4"
+                  className="list-row"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>

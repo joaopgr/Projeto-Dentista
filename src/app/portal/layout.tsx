@@ -21,9 +21,9 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50/80 via-slate-50 to-slate-100">
-      <header className="border-b border-teal-100/80 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50/60 via-slate-50 to-white">
+      <header className="border-b border-white/50 bg-white/75 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-5">
           <BrandLogo variant="portal" />
           <ClientSignOutButton />
         </div>

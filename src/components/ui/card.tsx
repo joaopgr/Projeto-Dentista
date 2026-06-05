@@ -10,7 +10,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-200/50",
+        "rounded-[1.75rem] border border-white/60 bg-white/90 p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm",
         className
       )}
     >
@@ -28,8 +28,8 @@ export function PageHeader({
 }) {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
-      {subtitle && <p className="mt-1 text-slate-500">{subtitle}</p>}
+      <h1 className="page-title">{title}</h1>
+      {subtitle && <p className="page-subtitle">{subtitle}</p>}
     </div>
   );
 }

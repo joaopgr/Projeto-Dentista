@@ -257,7 +257,7 @@ function NewAppointmentForm() {
               placeholder="Informações adicionais sobre a consulta"
             />
 
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3">
+            <label className="flex cursor-pointer items-start gap-3 rounded-[1.35rem] border border-slate-200/60 bg-slate-50/40 p-4 transition hover:border-teal-200 hover:bg-teal-50/30">
               <input
                 type="checkbox"
                 checked={registerPayment}
@@ -288,10 +288,7 @@ function NewAppointmentForm() {
               <Button type="submit" loading={loading}>
                 Agendar consulta
               </Button>
-              <Link
-                href="/agenda"
-                className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
+              <Link href="/agenda" className="btn-ghost">
                 Cancelar
               </Link>
             </div>
@@ -308,13 +305,13 @@ export default function NewAppointmentPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/agenda"
-          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+          className="icon-btn"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Novo agendamento</h1>
-          <p className="text-sm text-slate-600">Marque uma consulta para o paciente</p>
+          <h1 className="page-title">Novo agendamento</h1>
+          <p className="page-subtitle">Marque uma consulta para o paciente</p>
         </div>
       </div>
 
