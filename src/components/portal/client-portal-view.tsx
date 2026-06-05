@@ -59,8 +59,9 @@ export function ClientPortalView({
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-teal-100 bg-teal-50/60 p-5">
-        <p className="text-sm font-medium text-teal-800">Olá,</p>
-        <h1 className="text-2xl font-bold text-slate-900">{patient.full_name}</h1>
+        <p className="text-sm font-medium text-teal-800">
+          Bem-vindo(a), <span className="font-semibold">{patient.full_name}</span>!
+        </p>
         <p className="mt-1 text-sm text-slate-600">
           Acompanhe suas consultas e pagamentos
         </p>
@@ -80,7 +81,7 @@ export function ClientPortalView({
             )}
           >
             <Icon className="h-4 w-4" />
-            <span className="hidden sm:inline">{label}</span>
+            <span className="sm:inline">{label}</span>
           </button>
         ))}
       </div>

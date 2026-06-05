@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import {
   CLIENT_SESSION_COOKIE,
@@ -6,6 +5,24 @@ import {
 } from "@/lib/client-session";
 import { getPortalData } from "@/lib/portal/data";
 import { ClientPortalView } from "@/components/portal/client-portal-view";
+import { ClientSignOutButton } from "@/components/portal/client-sign-out-button";
+
+function PortalLoadError() {
+  return (
+    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+      <p className="font-medium text-amber-900">
+        Não foi possível carregar seus dados.
+      </p>
+      <p className="mt-2 text-sm text-amber-800">
+        Saia e entre novamente. Se o problema continuar, a clínica precisa
+        executar a migração <strong>004_client_portal.sql</strong> no Supabase.
+      </p>
+      <div className="mt-4 flex justify-center">
+        <ClientSignOutButton />
+      </div>
+    </div>
+  );
+}
 
 export default async function PortalPage() {
   const cookieStore = await cookies();
@@ -13,13 +30,13 @@ export default async function PortalPage() {
   const session = token ? await verifyClientSessionToken(token) : null;
 
   if (!session) {
-    redirect("/login");
+    return <PortalLoadError />;
   }
 
   const data = await getPortalData(session.patientId, session.cpf);
 
-  if (!data) {
-    redirect("/login");
+  if (!data?.patient?.full_name) {
+    return <PortalLoadError />;
   }
 
   return (

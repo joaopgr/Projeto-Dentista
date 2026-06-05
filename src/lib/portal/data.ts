@@ -17,6 +17,23 @@ function normalizeCpf(value: string): string {
   return value.replace(/\D/g, "");
 }
 
+function parseRpcPortalResponse(data: unknown): RpcPortalResponse | null {
+  if (!data) return null;
+
+  const parsed =
+    typeof data === "string"
+      ? (JSON.parse(data) as RpcPortalResponse)
+      : (data as RpcPortalResponse);
+
+  if (!parsed?.patient?.id || !parsed.patient.full_name) return null;
+
+  return {
+    patient: parsed.patient,
+    appointments: Array.isArray(parsed.appointments) ? parsed.appointments : [],
+    payments: Array.isArray(parsed.payments) ? parsed.payments : [],
+  };
+}
+
 async function loginViaRpc(
   cpf: string,
   password: string
@@ -123,6 +140,19 @@ function splitAppointments(appointments: Appointment[]) {
   return { upcomingAppointments, pastAppointments };
 }
 
+function buildPortalData(parsed: RpcPortalResponse): PortalData {
+  const { upcomingAppointments, pastAppointments } = splitAppointments(
+    parsed.appointments
+  );
+
+  return {
+    patient: parsed.patient,
+    upcomingAppointments,
+    pastAppointments,
+    payments: parsed.payments,
+  };
+}
+
 async function getPortalDataViaRpc(
   patientId: string,
   cpf: string
@@ -135,17 +165,10 @@ async function getPortalDataViaRpc(
 
   if (error || !data) return null;
 
-  const parsed = data as RpcPortalResponse;
-  const { upcomingAppointments, pastAppointments } = splitAppointments(
-    parsed.appointments || []
-  );
+  const parsed = parseRpcPortalResponse(data);
+  if (!parsed) return null;
 
-  return {
-    patient: parsed.patient,
-    upcomingAppointments,
-    pastAppointments,
-    payments: parsed.payments || [],
-  };
+  return buildPortalData(parsed);
 }
 
 async function getPortalDataViaAdmin(patientId: string): Promise<PortalData | null> {
@@ -172,16 +195,11 @@ async function getPortalDataViaAdmin(patientId: string): Promise<PortalData | nu
       .eq("patient_id", patientId)
       .order("created_at", { ascending: false });
 
-    const { upcomingAppointments, pastAppointments } = splitAppointments(
-      appointments || []
-    );
-
-    return {
+    return buildPortalData({
       patient,
-      upcomingAppointments,
-      pastAppointments,
+      appointments: appointments || [],
       payments: (payments || []) as PortalPayment[],
-    };
+    });
   } catch {
     return null;
   }

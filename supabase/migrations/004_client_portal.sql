@@ -1,6 +1,6 @@
 -- ============================================================
 -- Migração: Portal do cliente (login por CPF)
--- Execute no SQL Editor do Supabase
+-- Execute no SQL Editor do Supabase (pode rodar de novo com CREATE OR REPLACE)
 -- ============================================================
 
 create or replace function public.client_portal_login(
@@ -37,67 +37,83 @@ create or replace function public.client_portal_get_data(
   patient_id uuid,
   cpf_input text
 )
-returns json
+returns jsonb
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
   normalized_cpf text;
-  patient_json json;
-  appointments_json json;
-  payments_json json;
+  result jsonb;
 begin
   normalized_cpf := regexp_replace(cpf_input, '\D', '', 'g');
 
   if not exists (
     select 1 from public.patients p
-    where p.id = patient_id and p.cpf = normalized_cpf
+    where p.id = client_portal_get_data.patient_id
+      and p.cpf = normalized_cpf
   ) then
     return null;
   end if;
 
-  select row_to_json(p) into patient_json
-  from public.patients p
-  where p.id = patient_id;
-
-  select coalesce(
-    json_agg(row_to_json(a) order by a.scheduled_at desc),
-    '[]'::json
-  ) into appointments_json
-  from public.appointments a
-  where a.patient_id = patient_id;
-
-  begin
-    select coalesce(
-      json_agg(
-        to_jsonb(pay) || jsonb_build_object(
-          'payment_installments',
-          coalesce(
-            (
-              select json_agg(row_to_json(pi) order by pi.installment_number)
-              from public.payment_installments pi
-              where pi.payment_id = pay.id
-            ),
-            '[]'::json
-          )
-        )
-        order by pay.created_at desc
+  select jsonb_build_object(
+    'patient', (
+      select to_jsonb(p.*)
+      from public.patients p
+      where p.id = client_portal_get_data.patient_id
+    ),
+    'appointments', coalesce(
+      (
+        select jsonb_agg(to_jsonb(a.*) order by a.scheduled_at desc)
+        from public.appointments a
+        where a.patient_id = client_portal_get_data.patient_id
       ),
-      '[]'::json
-    ) into payments_json
-    from public.payments pay
-    where pay.patient_id = patient_id;
-  exception
-    when undefined_table then
-      payments_json := '[]'::json;
-  end;
+      '[]'::jsonb
+    ),
+    'payments', coalesce(
+      (
+        select jsonb_agg(
+          to_jsonb(pay.*) || jsonb_build_object(
+            'payment_installments',
+            coalesce(
+              (
+                select jsonb_agg(to_jsonb(pi.*) order by pi.installment_number)
+                from public.payment_installments pi
+                where pi.payment_id = pay.id
+              ),
+              '[]'::jsonb
+            )
+          )
+          order by pay.created_at desc
+        )
+        from public.payments pay
+        where pay.patient_id = client_portal_get_data.patient_id
+      ),
+      '[]'::jsonb
+    )
+  ) into result;
 
-  return json_build_object(
-    'patient', patient_json,
-    'appointments', appointments_json,
-    'payments', payments_json
-  );
+  return result;
+exception
+  when undefined_table then
+    select jsonb_build_object(
+      'patient', (
+        select to_jsonb(p.*)
+        from public.patients p
+        where p.id = client_portal_get_data.patient_id
+      ),
+      'appointments', coalesce(
+        (
+          select jsonb_agg(to_jsonb(a.*) order by a.scheduled_at desc)
+          from public.appointments a
+          where a.patient_id = client_portal_get_data.patient_id
+        ),
+        '[]'::jsonb
+      ),
+      'payments', '[]'::jsonb
+    ) into result;
+
+    return result;
 end;
 $$;
 
