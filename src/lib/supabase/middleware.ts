@@ -43,6 +43,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/login");
   const isPortal = pathname.startsWith("/portal");
   const isClientApi = pathname.startsWith("/api/client");
+  const isPublicConfirm = pathname.startsWith("/c/");
   const isHome = pathname === "/";
 
   const clientToken = request.cookies.get(CLIENT_SESSION_COOKIE)?.value;
@@ -80,7 +81,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (!user && !effectiveClientId && !isAuthPage && !isHome && !isClientApi) {
+  if (!user && !effectiveClientId && !isAuthPage && !isHome && !isClientApi && !isPublicConfirm) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

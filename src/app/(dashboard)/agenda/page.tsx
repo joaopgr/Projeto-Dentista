@@ -15,6 +15,8 @@ import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
+import { TomorrowRemindersPanel } from "@/components/appointments/tomorrow-reminders-panel";
+import { fetchTomorrowReminders } from "@/lib/appointments/tomorrow-reminders";
 import { normalizeRelation } from "@/lib/utils";
 import { APPOINTMENT_STATUS_LABELS, type AppointmentWithPatient } from "@/types/database";
 
@@ -52,6 +54,7 @@ async function TodayView({ dia }: { dia?: string }) {
     .order("scheduled_at", { ascending: true });
 
   const list = normalizeAppointments(appointments);
+  const tomorrowReminders = await fetchTomorrowReminders();
 
   return (
     <div className="space-y-6">
@@ -60,6 +63,8 @@ async function TodayView({ dia }: { dia?: string }) {
         subtitle={format(dayStart, "EEEE, d 'de' MMMM", { locale: ptBR })}
         isToday={isToday(dayStart)}
       />
+
+      <TomorrowRemindersPanel appointments={tomorrowReminders} />
 
       <ViewTabs active="hoje" />
 
@@ -135,6 +140,7 @@ async function WeekView({ semana }: { semana?: string }) {
     .order("scheduled_at", { ascending: true });
 
   const grouped = groupByDay(normalizeAppointments(appointments));
+  const tomorrowReminders = await fetchTomorrowReminders();
 
   return (
     <div className="space-y-6">
@@ -142,6 +148,8 @@ async function WeekView({ semana }: { semana?: string }) {
         title="Agenda"
         subtitle={`${format(weekStart, "d MMM", { locale: ptBR })} — ${format(weekEnd, "d MMM yyyy", { locale: ptBR })}`}
       />
+
+      <TomorrowRemindersPanel appointments={tomorrowReminders} />
 
       <ViewTabs active="semana" />
 
@@ -339,9 +347,9 @@ function groupByDay(appointments: AppointmentWithPatient[] | null) {
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     scheduled: "bg-blue-100 text-blue-800",
-    confirmed: "bg-teal-100 text-teal-800",
+    confirmed: "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200",
     completed: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
+    cancelled: "bg-red-100 text-red-800 ring-1 ring-red-200",
     no_show: "bg-orange-100 text-orange-800",
   };
 

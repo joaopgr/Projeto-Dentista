@@ -35,6 +35,8 @@ export type Appointment = {
   status: AppointmentStatus;
   procedure_type: string | null;
   notes: string | null;
+  confirmation_token: string;
+  reminder_sent_at: string | null;
   created_at: string;
   updated_at: string;
 };
