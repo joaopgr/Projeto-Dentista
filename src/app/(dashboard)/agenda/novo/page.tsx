@@ -21,6 +21,8 @@ function NewAppointmentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselected = searchParams.get("paciente") || "";
+  const preselectedDate = searchParams.get("data") || "";
+  const preselectedTime = searchParams.get("hora") || "";
 
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,8 +31,8 @@ function NewAppointmentForm() {
   const [paymentForm, setPaymentForm] = useState<PaymentFormState>(defaultPaymentFormState);
   const [form, setForm] = useState({
     patient_id: preselected,
-    scheduled_date: "",
-    scheduled_time: "",
+    scheduled_date: preselectedDate,
+    scheduled_time: preselectedTime,
     duration_minutes: "60",
     procedure_type: "Consulta",
     status: "scheduled",
@@ -55,6 +57,16 @@ function NewAppointmentForm() {
       setForm((prev) => ({ ...prev, patient_id: preselected }));
     }
   }, [preselected]);
+
+  useEffect(() => {
+    if (preselectedDate || preselectedTime) {
+      setForm((prev) => ({
+        ...prev,
+        ...(preselectedDate ? { scheduled_date: preselectedDate } : {}),
+        ...(preselectedTime ? { scheduled_time: preselectedTime } : {}),
+      }));
+    }
+  }, [preselectedDate, preselectedTime]);
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));

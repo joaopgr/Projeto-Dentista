@@ -15,11 +15,17 @@ import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
+import { AppointmentCalendar } from "@/components/appointments/appointment-calendar";
 import { TomorrowRemindersPanel } from "@/components/appointments/tomorrow-reminders-panel";
+import { formatAppointmentRange } from "@/lib/appointments/calendar";
 import { fetchTomorrowReminders } from "@/lib/appointments/tomorrow-reminders";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { normalizeRelation } from "@/lib/utils";
-import { APPOINTMENT_STATUS_LABELS, type AppointmentWithPatient } from "@/types/database";
+import {
+  APPOINTMENT_STATUS_LABELS,
+  formatDurationMinutes,
+  type AppointmentWithPatient,
+} from "@/types/database";
 
 export default async function AgendaPage({
   searchParams,
@@ -27,10 +33,19 @@ export default async function AgendaPage({
   searchParams: Promise<{ semana?: string; dia?: string; view?: string }>;
 }) {
   const params = await searchParams;
-  const view = params.view === "semana" ? "semana" : "hoje";
+  const view =
+    params.view === "semana"
+      ? "semana"
+      : params.view === "calendario"
+        ? "calendario"
+        : "hoje";
 
   if (view === "hoje") {
     return <TodayView dia={params.dia} />;
+  }
+
+  if (view === "calendario") {
+    return <CalendarView semana={params.semana} />;
   }
 
   return <WeekView semana={params.semana} />;
@@ -94,12 +109,12 @@ async function TodayView({ dia }: { dia?: string }) {
               <li key={apt.id}>
                 <Link href={`/agenda/${apt.id}`} className="list-row">
                   <div className="flex items-center gap-4">
-                    <div className="time-badge">
-                      <span className="text-sm font-bold leading-none">
-                        {format(new Date(apt.scheduled_at), "HH:mm")}
+                    <div className="flex shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 px-3 py-2 text-white shadow-md shadow-teal-600/25">
+                      <span className="text-sm font-bold leading-tight">
+                        {formatAppointmentRange(apt.scheduled_at, apt.duration_minutes)}
                       </span>
                       <span className="mt-0.5 text-[10px] font-medium text-white/80">
-                        {apt.duration_minutes}min
+                        {formatDurationMinutes(apt.duration_minutes)}
                       </span>
                     </div>
                     <div>
@@ -118,6 +133,50 @@ async function TodayView({ dia }: { dia?: string }) {
           </ul>
         )}
       </Card>
+    </div>
+  );
+}
+
+async function CalendarView({ semana }: { semana?: string }) {
+  const baseDate = semana ? new Date(semana + "T12:00:00") : new Date();
+  const weekStart = startOfWeek(baseDate, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(baseDate, { weekStartsOn: 1 });
+
+  const prevWeek = format(subWeeks(weekStart, 1), "yyyy-MM-dd");
+  const nextWeek = format(addWeeks(weekStart, 1), "yyyy-MM-dd");
+  const weekParam = format(weekStart, "yyyy-MM-dd");
+
+  const supabase = await createClient();
+  const { data: appointments } = await supabase
+    .from("appointments")
+    .select("*, patients(id, full_name, phone)")
+    .gte("scheduled_at", weekStart.toISOString())
+    .lte("scheduled_at", weekEnd.toISOString())
+    .order("scheduled_at", { ascending: true });
+
+  const list = normalizeAppointments(appointments);
+  const tomorrowReminders = await fetchTomorrowReminders();
+  const appUrl = getAppBaseUrl();
+
+  return (
+    <div className="space-y-6">
+      <AgendaHeader
+        title="Agenda"
+        subtitle={`${format(weekStart, "d MMM", { locale: ptBR })} — ${format(weekEnd, "d MMM yyyy", { locale: ptBR })}`}
+      />
+
+      <TomorrowRemindersPanel appointments={tomorrowReminders} appUrl={appUrl} />
+
+      <ViewTabs active="calendario" />
+
+      <DayNavigation
+        prevHref={`/agenda?view=calendario&semana=${prevWeek}`}
+        nextHref={`/agenda?view=calendario&semana=${nextWeek}`}
+        currentHref={`/agenda?view=calendario&semana=${weekParam}`}
+        currentLabel="Semana atual"
+      />
+
+      <AppointmentCalendar weekStart={weekParam} appointments={list} />
     </div>
   );
 }
@@ -199,11 +258,12 @@ async function WeekView({ semana }: { semana?: string }) {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <p className="font-medium text-slate-900">
-                              {format(new Date(apt.scheduled_at), "HH:mm")} —{" "}
+                              {formatAppointmentRange(apt.scheduled_at, apt.duration_minutes)} —{" "}
                               {apt.patients.full_name}
                             </p>
                             <p className="text-sm text-slate-500">
-                              {apt.procedure_type || "Consulta"} · {apt.duration_minutes} min
+                              {apt.procedure_type || "Consulta"} ·{" "}
+                              {formatDurationMinutes(apt.duration_minutes)}
                             </p>
                           </div>
                           <StatusBadge status={apt.status} />
@@ -254,9 +314,9 @@ function AgendaHeader({
   );
 }
 
-function ViewTabs({ active }: { active: "hoje" | "semana" }) {
+function ViewTabs({ active }: { active: "hoje" | "semana" | "calendario" }) {
   return (
-    <div className="pill-tabs">
+    <div className="pill-tabs flex-wrap">
       <Link
         href="/agenda?view=hoje"
         className={`pill-tab ${active === "hoje" ? "pill-tab-active" : ""}`}
@@ -267,7 +327,13 @@ function ViewTabs({ active }: { active: "hoje" | "semana" }) {
         href="/agenda?view=semana"
         className={`pill-tab ${active === "semana" ? "pill-tab-active" : ""}`}
       >
-        Semana
+        Lista semanal
+      </Link>
+      <Link
+        href="/agenda?view=calendario"
+        className={`pill-tab ${active === "calendario" ? "pill-tab-active" : ""}`}
+      >
+        Calendário
       </Link>
     </div>
   );

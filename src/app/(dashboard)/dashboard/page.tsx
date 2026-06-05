@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { format, startOfDay, endOfDay } from "date-fns";
+import { formatAppointmentRange } from "@/lib/appointments/calendar";
 import { ptBR } from "date-fns/locale";
 import { AlertTriangle, Calendar, ChevronRight, Clock, Package, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/branding";
 import { Card } from "@/components/ui/card";
 import { normalizeRelation } from "@/lib/utils";
-import { APPOINTMENT_STATUS_LABELS, isLowStock } from "@/types/database";
+import {
+  APPOINTMENT_STATUS_LABELS,
+  formatDurationMinutes,
+  isLowStock,
+} from "@/types/database";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -123,12 +128,12 @@ export default async function DashboardPage() {
                     href={`/agenda/${apt.id}`}
                     className="list-row !flex-nowrap items-center"
                   >
-                    <div className="time-badge">
-                      <span className="text-base font-bold leading-none">
-                        {format(new Date(apt.scheduled_at), "HH:mm")}
+                    <div className="flex shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 px-3 py-2 text-white shadow-md shadow-teal-600/25">
+                      <span className="text-sm font-bold leading-tight">
+                        {formatAppointmentRange(apt.scheduled_at, apt.duration_minutes)}
                       </span>
                       <span className="mt-0.5 text-[10px] font-medium text-white/80">
-                        {apt.duration_minutes}min
+                        {formatDurationMinutes(apt.duration_minutes)}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">

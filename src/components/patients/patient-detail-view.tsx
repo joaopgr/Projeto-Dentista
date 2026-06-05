@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { Calendar, CreditCard, User } from "lucide-react";
 import { getPaymentMethodLabel, sumPaid } from "@/lib/finance";
+import { formatAppointmentRange } from "@/lib/appointments/calendar";
 import { cn, formatCurrency, splitScheduledAt } from "@/lib/utils";
 import { PatientForm } from "@/components/patients/patient-form";
 import {
   APPOINTMENT_STATUS_LABELS,
+  formatDurationMinutes,
   type Appointment,
   type Patient,
   type Payment,
@@ -88,7 +90,7 @@ export function PatientDetailView({
           ) : (
             <div className="divide-y divide-slate-100">
               {appointments.map((apt) => {
-                const { date, time } = splitScheduledAt(apt.scheduled_at);
+                const { date } = splitScheduledAt(apt.scheduled_at);
                 const [y, m, d] = date.split("-");
                 return (
                   <Link
@@ -101,7 +103,8 @@ export function PatientDetailView({
                         {apt.procedure_type || "Consulta"}
                       </p>
                       <p className="text-sm text-slate-600">
-                        {d}/{m}/{y} às {time}
+                        {d}/{m}/{y} · {formatAppointmentRange(apt.scheduled_at, apt.duration_minutes)}{" "}
+                        ({formatDurationMinutes(apt.duration_minutes)})
                       </p>
                     </div>
                     <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
