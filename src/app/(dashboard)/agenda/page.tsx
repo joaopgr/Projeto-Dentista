@@ -18,7 +18,8 @@ import { Card } from "@/components/ui/card";
 import { AppointmentCalendar } from "@/components/appointments/appointment-calendar";
 import { TomorrowRemindersPanel } from "@/components/appointments/tomorrow-reminders-panel";
 import { formatAppointmentRange } from "@/lib/appointments/calendar";
-import { fetchTomorrowReminders } from "@/lib/appointments/tomorrow-reminders";
+import { QuickConfirmButton } from "@/components/appointments/quick-confirm-button";
+import { fetchReminderAppointments } from "@/lib/appointments/tomorrow-reminders";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { normalizeRelation } from "@/lib/utils";
 import {
@@ -70,7 +71,7 @@ async function TodayView({ dia }: { dia?: string }) {
     .order("scheduled_at", { ascending: true });
 
   const list = normalizeAppointments(appointments);
-  const tomorrowReminders = await fetchTomorrowReminders();
+  const reminderAppointments = await fetchReminderAppointments();
   const appUrl = getAppBaseUrl();
 
   return (
@@ -81,7 +82,7 @@ async function TodayView({ dia }: { dia?: string }) {
         isToday={isToday(dayStart)}
       />
 
-      <TomorrowRemindersPanel appointments={tomorrowReminders} appUrl={appUrl} />
+      <TomorrowRemindersPanel appointments={reminderAppointments} appUrl={appUrl} />
 
       <ViewTabs active="hoje" />
 
@@ -106,28 +107,31 @@ async function TodayView({ dia }: { dia?: string }) {
         ) : (
           <ul className="space-y-3">
             {list.map((apt) => (
-              <li key={apt.id}>
-                <Link href={`/agenda/${apt.id}`} className="list-row">
-                  <div className="flex items-center gap-4">
-                    <div className="flex shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 px-3 py-2 text-white shadow-md shadow-teal-600/25">
-                      <span className="text-sm font-bold leading-tight">
-                        {formatAppointmentRange(apt.scheduled_at, apt.duration_minutes)}
-                      </span>
-                      <span className="mt-0.5 text-[10px] font-medium text-white/80">
-                        {formatDurationMinutes(apt.duration_minutes)}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">
-                        {apt.patients.full_name}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        {apt.procedure_type || "Consulta"} · {apt.patients.phone}
-                      </p>
-                    </div>
+              <li key={apt.id} className="list-row">
+                <Link href={`/agenda/${apt.id}`} className="flex min-w-0 flex-1 items-center gap-4">
+                  <div className="flex shrink-0 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 px-3 py-2 text-white shadow-md shadow-teal-600/25">
+                    <span className="text-sm font-bold leading-tight">
+                      {formatAppointmentRange(apt.scheduled_at, apt.duration_minutes)}
+                    </span>
+                    <span className="mt-0.5 text-[10px] font-medium text-white/80">
+                      {formatDurationMinutes(apt.duration_minutes)}
+                    </span>
                   </div>
-                  <StatusBadge status={apt.status} />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-900">
+                      {apt.patients.full_name}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {apt.procedure_type || "Consulta"} · {apt.patients.phone}
+                    </p>
+                  </div>
                 </Link>
+                <div className="flex shrink-0 items-center gap-2">
+                  {apt.status === "scheduled" && (
+                    <QuickConfirmButton appointmentId={apt.id} />
+                  )}
+                  <StatusBadge status={apt.status} />
+                </div>
               </li>
             ))}
           </ul>
@@ -155,7 +159,7 @@ async function CalendarView({ semana }: { semana?: string }) {
     .order("scheduled_at", { ascending: true });
 
   const list = normalizeAppointments(appointments);
-  const tomorrowReminders = await fetchTomorrowReminders();
+  const reminderAppointments = await fetchReminderAppointments();
   const appUrl = getAppBaseUrl();
 
   return (
@@ -165,7 +169,7 @@ async function CalendarView({ semana }: { semana?: string }) {
         subtitle={`${format(weekStart, "d MMM", { locale: ptBR })} — ${format(weekEnd, "d MMM yyyy", { locale: ptBR })}`}
       />
 
-      <TomorrowRemindersPanel appointments={tomorrowReminders} appUrl={appUrl} />
+      <TomorrowRemindersPanel appointments={reminderAppointments} appUrl={appUrl} />
 
       <ViewTabs active="calendario" />
 
@@ -198,7 +202,7 @@ async function WeekView({ semana }: { semana?: string }) {
     .order("scheduled_at", { ascending: true });
 
   const grouped = groupByDay(normalizeAppointments(appointments));
-  const tomorrowReminders = await fetchTomorrowReminders();
+  const reminderAppointments = await fetchReminderAppointments();
   const appUrl = getAppBaseUrl();
 
   return (
@@ -208,7 +212,7 @@ async function WeekView({ semana }: { semana?: string }) {
         subtitle={`${format(weekStart, "d MMM", { locale: ptBR })} — ${format(weekEnd, "d MMM yyyy", { locale: ptBR })}`}
       />
 
-      <TomorrowRemindersPanel appointments={tomorrowReminders} appUrl={appUrl} />
+      <TomorrowRemindersPanel appointments={reminderAppointments} appUrl={appUrl} />
 
       <ViewTabs active="semana" />
 
